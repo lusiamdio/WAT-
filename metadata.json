@@ -1,0 +1,6 @@
+{
+  "name": "WAT Instant Messenger",
+  "description": "Next-generation Matrix-powered instant messaging platform featuring real-time chats, E2EE security, AI translation & assistant, WebRTC calls, stories, and commerce.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

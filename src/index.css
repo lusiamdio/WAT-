@@ -1,0 +1,346 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  /* WAT Crystal OS Glass Tokens (Light Theme) */
+  .glass-canvas {
+    background: #ffffff;
+  }
+
+  .glass-surface {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px) saturate(120%);
+    -webkit-backdrop-filter: blur(28px) saturate(120%);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  }
+
+  .glass-card-subtle {
+    background: rgba(248, 249, 250, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .glass-black {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.22);
+  }
+
+  .glass-nav-capsule {
+    background: rgba(0, 0, 0, 0.90);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  }
+
+  .glass-bubble-peer {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.03);
+  }
+
+  .glass-bubble-own {
+    background: rgba(18, 18, 18, 0.94);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  .glass-input {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  /* WAT Crystal OS Glass Tokens (Native Dark Mode Overrides) */
+  .dark .glass-canvas {
+    background: #0b0c10;
+  }
+
+  .dark .glass-surface {
+    background: rgba(18, 21, 29, 0.78);
+    backdrop-filter: blur(30px) saturate(135%);
+    -webkit-backdrop-filter: blur(30px) saturate(135%);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.45);
+    color: #f3f4f6;
+  }
+
+  .dark .glass-card {
+    background: rgba(23, 26, 36, 0.80);
+    backdrop-filter: blur(26px) saturate(130%);
+    -webkit-backdrop-filter: blur(26px) saturate(130%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.40);
+    color: #f3f4f6;
+  }
+
+  .dark .glass-card-subtle {
+    background: rgba(28, 32, 44, 0.70);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: #e5e7eb;
+  }
+
+  .dark .glass-black {
+    background: rgba(13, 15, 21, 0.94);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    box-shadow: 0 14px 44px rgba(0, 0, 0, 0.60);
+  }
+
+  .dark .glass-nav-capsule {
+    background: rgba(16, 18, 25, 0.92);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.50);
+  }
+
+  .dark .glass-bubble-peer {
+    background: rgba(28, 32, 44, 0.88);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.25);
+    color: #f3f4f6;
+  }
+
+  .dark .glass-bubble-own {
+    background: rgba(16, 185, 129, 0.25);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(16, 185, 129, 0.40);
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  .dark .glass-input {
+    background: rgba(23, 26, 36, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f9fafb;
+  }
+}
+
+/* Native Dark Mode Global Styles & Glass Adaptations */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body,
+.dark #root {
+  background-color: #0b0c10;
+  color: #f9fafb;
+}
+
+/* Intelligent glass container adaptations in dark mode */
+.dark .bg-white\/90,
+.dark .bg-white\/85,
+.dark .bg-white\/80 {
+  background-color: rgba(20, 23, 32, 0.82) !important;
+  color: #f9fafb;
+}
+
+.dark .bg-white\/70,
+.dark .bg-white\/60,
+.dark .bg-white\/50 {
+  background-color: rgba(24, 27, 38, 0.65) !important;
+}
+
+.dark .bg-white {
+  background-color: #141720 !important;
+  color: #f9fafb;
+}
+
+.dark .bg-neutral-100 {
+  background-color: #0e1017 !important;
+}
+
+.dark .bg-neutral-50 {
+  background-color: #12141d !important;
+}
+
+.dark .bg-\[\#F9FAFB\] {
+  background-color: #0b0c10 !important;
+}
+
+.dark .text-neutral-900,
+.dark .text-neutral-800 {
+  color: #f9fafb !important;
+}
+
+.dark .text-neutral-700,
+.dark .text-neutral-600 {
+  color: #d1d5db !important;
+}
+
+.dark .text-neutral-500 {
+  color: #9ca3af !important;
+}
+
+.dark .border-black\/\[0\.08\],
+.dark .border-black\/\[0\.06\],
+.dark .border-black\/\[0\.05\],
+.dark .border-black\/\[0\.04\],
+.dark .border-black\/\[0\.10\],
+.dark .border-black\/\[0\.12\],
+.dark .border-black\/10,
+.dark .border-black\/5 {
+  border-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+.dark .divide-black\/\[0\.06\] > :not([hidden]) ~ :not([hidden]),
+.dark .divide-black\/\[0\.08\] > :not([hidden]) ~ :not([hidden]),
+.dark .divide-black\/10 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .hover\:bg-black\/\[0\.02\]:hover,
+.dark .hover\:bg-black\/\[0\.04\]:hover,
+.dark .hover\:bg-black\/\[0\.05\]:hover,
+.dark .hover\:bg-black\/\[0\.08\]:hover {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+.dark .bg-black\/\[0\.04\],
+.dark .bg-black\/\[0\.05\],
+.dark .bg-black\/\[0\.06\],
+.dark .bg-black\/\[0\.08\] {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+  color: #f3f4f6;
+}
+
+.dark .ring-black\/5,
+.dark .ring-black\/10 {
+  --tw-ring-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark .shadow-\[0_16px_40px_rgba\(0\,0\,0\,0\.06\)\],
+.dark .shadow-\[0_16px_40px_rgba\(0\,0\,0\,0\.10\)\] {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes glassDotPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale {
+  animation: scaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-glass-dot-1 {
+  animation: glassDotPulse 1.4s ease-in-out infinite;
+}
+.animate-glass-dot-2 {
+  animation: glassDotPulse 1.4s ease-in-out infinite 0.2s;
+}
+.animate-glass-dot-3 {
+  animation: glassDotPulse 1.4s ease-in-out infinite 0.4s;
+}
+
+/* Apple-style crystal scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.24);
+}
