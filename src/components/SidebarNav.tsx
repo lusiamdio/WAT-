@@ -27,6 +27,7 @@ export const SidebarNav: React.FC = () => {
     setIsUserSwitcherOpen,
     setIsUniversalSearchOpen,
     rooms,
+    stories,
   } = useChat();
 
   const totalUnread = rooms.reduce((acc, r) => acc + (r.unreadCount || 0), 0);

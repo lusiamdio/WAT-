@@ -13,6 +13,8 @@ import { CallsView } from './components/CallsView';
 import { MatrixConferenceView } from './components/MatrixConferenceView';
 import { WebRTCCallModal } from './components/WebRTCCallModal';
 import { StatusViewerModal } from './components/StatusViewerModal';
+import { StatusStoriesView } from './components/status/StatusStoriesView';
+import { PublishStatusModal } from './components/status/PublishStatusModal';
 import { ArchitectureBlueprintModal } from './components/ArchitectureBlueprintModal';
 import { E2EEVerificationModal } from './components/E2EEVerificationModal';
 import { UserVerificationServiceModal } from './components/UserVerificationServiceModal';
@@ -85,6 +87,10 @@ const MainAuthenticatedLayout: React.FC = () => {
     setIsEmailViewerOpen,
     viewingEmailNotification,
     openEmailViewer,
+    isPublishStatusModalOpen,
+    setIsPublishStatusModalOpen,
+    statusUploadInitialMode,
+    stories,
   } = useChat();
 
   const totalUnread = rooms.reduce((acc, r) => acc + (r.unreadCount || 0), 0);
@@ -192,11 +198,7 @@ const MainAuthenticatedLayout: React.FC = () => {
           {activeTab === 'you' && <YouProfileView />}
 
           {/* Auxiliary Views */}
-          {activeTab === 'stories' && (
-            <div className="flex-1 flex h-full min-w-0 pb-16 md:pb-0">
-              <ChatList />
-            </div>
-          )}
+          {activeTab === 'stories' && <StatusStoriesView />}
           {activeTab === 'communities' && <CommunitiesView />}
           {activeTab === 'calls' && <CallsView />}
           {activeTab === 'conference' && <MatrixConferenceView />}
@@ -303,6 +305,11 @@ const MainAuthenticatedLayout: React.FC = () => {
       <CommandCenterModal />
       <WebRTCCallModal />
       <StatusViewerModal />
+      <PublishStatusModal
+        isOpen={isPublishStatusModalOpen}
+        onClose={() => setIsPublishStatusModalOpen(false)}
+        initialMode={statusUploadInitialMode}
+      />
       <ArchitectureBlueprintModal />
       <E2EEVerificationModal />
       <UserVerificationServiceModal />

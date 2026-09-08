@@ -145,6 +145,7 @@ interface ChatContextType {
   communities: CommunitySpace[];
   addStory: (story: Omit<StoryStatus, 'id' | 'viewsCount' | 'viewed' | 'timestamp'>) => void;
   markStoryViewed: (storyId: string) => void;
+  deleteStory: (storyId: string) => void;
 
   // Business Suite & Mode
   products: ProductInfo[];
@@ -238,6 +239,11 @@ interface ChatContextType {
   setIsStoryViewerOpen: (open: boolean) => void;
   selectedStoryIndex: number;
   setSelectedStoryIndex: (index: number) => void;
+  isPublishStatusModalOpen: boolean;
+  setIsPublishStatusModalOpen: (open: boolean) => void;
+  statusUploadInitialMode: 'media' | 'text';
+  setStatusUploadInitialMode: (mode: 'media' | 'text') => void;
+  openStatusUpload: (mode?: 'media' | 'text') => void;
   isJitsiDevOpsOpen: boolean;
   setIsJitsiDevOpsOpen: (open: boolean) => void;
   jitsiServerConfig: JitsiServerConfig;
@@ -1021,6 +1027,12 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState(0);
+  const [isPublishStatusModalOpen, setIsPublishStatusModalOpen] = useState(false);
+  const [statusUploadInitialMode, setStatusUploadInitialMode] = useState<'media' | 'text'>('media');
+  const openStatusUpload = (mode: 'media' | 'text' = 'media') => {
+    setStatusUploadInitialMode(mode);
+    setIsPublishStatusModalOpen(true);
+  };
   const [isJitsiDevOpsOpen, setIsJitsiDevOpsOpen] = useState(false);
   const [jitsiServerConfig, setJitsiServerConfig] = useState<JitsiServerConfig>({
     serverDomain: 'meet.wat.chat',
@@ -2243,6 +2255,10 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
+  const deleteStory = (storyId: string) => {
+    setStories((prev) => prev.filter((s) => s.id !== storyId));
+  };
+
   // Business invoice creator in chat
   const createInvoiceInChat = (
     amount: number,
@@ -2431,6 +2447,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         communities,
         addStory,
         markStoryViewed,
+        deleteStory,
         products,
         setProducts,
         addProduct,
@@ -2506,6 +2523,11 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsStoryViewerOpen,
         selectedStoryIndex,
         setSelectedStoryIndex,
+        isPublishStatusModalOpen,
+        setIsPublishStatusModalOpen,
+        statusUploadInitialMode,
+        setStatusUploadInitialMode,
+        openStatusUpload,
         isJitsiDevOpsOpen,
         setIsJitsiDevOpsOpen,
         jitsiServerConfig,
