@@ -47,18 +47,15 @@ export const ChatsStorageDevicesTab: React.FC<Props> = ({
   };
 
   return (
-    <div className="space-y-8 animate-fade-in text-neutral-200">
-      {/* 13. Linked Devices */}
-      <section className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-6 shadow-lg space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-          <div className="flex items-center gap-2">
-            <Laptop className="w-5 h-5 text-amber-400" />
-            <h3 className="text-base font-bold text-neutral-100">13. 💻 Linked Devices & Multi-Device Sync</h3>
-          </div>
+    <div className="space-y-8 animate-fade-in text-neutral-900">
+      {/* Linked Devices */}
+      <section className="bg-white rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3">
+          <h3 className="text-base font-bold text-neutral-900">Linked Devices & Multi-Device Sync</h3>
           <button
             type="button"
             onClick={() => showToast('Scan QR code with mobile phone to link terminal')}
-            className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 text-xs font-bold flex items-center gap-1 shadow-md"
+            className="px-3 py-1.5 rounded-xl bg-black hover:bg-neutral-800 text-white text-xs font-bold flex items-center gap-1 shadow-sm"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Link New Device</span>
@@ -69,22 +66,22 @@ export const ChatsStorageDevicesTab: React.FC<Props> = ({
           {linkedDevices.map((dev) => (
             <div
               key={dev.id}
-              className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-between"
+              className="p-4 rounded-2xl bg-white shadow-sm flex items-center justify-between"
             >
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-amber-400">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-neutral-900 shadow-xs">
                   {dev.deviceType === 'desktop' ? <Laptop className="w-5 h-5" /> : <Smartphone className="w-5 h-5" />}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-neutral-100">{dev.deviceName}</span>
+                    <span className="text-xs font-bold text-neutral-900">{dev.deviceName}</span>
                     {dev.isCurrent && (
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded-md bg-neutral-900 text-white text-[10px] font-bold">
                         THIS DEVICE
                       </span>
                     )}
                   </div>
-                  <div className="text-[11px] text-neutral-400 mt-0.5">
+                  <div className="text-[11px] text-neutral-500 mt-0.5">
                     {dev.os} • {dev.location} (IP: {dev.ipAddress})
                   </div>
                 </div>
@@ -94,7 +91,7 @@ export const ChatsStorageDevicesTab: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => handleDisconnectDevice(dev.id)}
-                  className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-rose-500/20 hover:text-rose-400 text-neutral-400 text-xs font-semibold border border-neutral-800 flex items-center gap-1 transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 hover:text-rose-600 text-neutral-600 text-xs font-semibold flex items-center gap-1 shadow-xs transition-all"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Log Out</span>
@@ -105,21 +102,18 @@ export const ChatsStorageDevicesTab: React.FC<Props> = ({
         </div>
       </section>
 
-      {/* 12. Chats & Storage Management */}
-      <section className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-6 shadow-lg space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-          <div className="flex items-center gap-2">
-            <HardDrive className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-base font-bold text-neutral-100">12. 💾 Cloud Storage & Encrypted Backups</h3>
-          </div>
-          <span className="text-xs font-mono text-neutral-400">
+      {/* Chats & Storage Management */}
+      <section className="bg-white rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3">
+          <h3 className="text-base font-bold text-neutral-900">Cloud Storage & Encrypted Backups</h3>
+          <span className="text-xs font-mono text-neutral-500">
             {chatsStorage.storageUsedMB} MB / {(chatsStorage.totalAvailableMB / 1024).toFixed(0)} GB USED
           </span>
         </div>
 
-        <div className="w-full bg-neutral-950 rounded-full h-2.5 overflow-hidden border border-neutral-800">
+        <div className="w-full bg-neutral-200 rounded-full h-2.5 overflow-hidden">
           <div
-            className="bg-emerald-500 h-full rounded-full"
+            className="bg-black h-full rounded-full"
             style={{ width: `${(chatsStorage.storageUsedMB / chatsStorage.totalAvailableMB) * 100 * 15}%` }}
           />
         </div>
@@ -135,14 +129,14 @@ export const ChatsStorageDevicesTab: React.FC<Props> = ({
             return (
               <div
                 key={item.key}
-                className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-between"
+                className="p-4 rounded-2xl bg-white shadow-sm flex items-center justify-between"
               >
-                <div className="text-xs font-bold text-neutral-200">{item.label}</div>
+                <div className="text-xs font-bold text-neutral-900">{item.label}</div>
                 <button
                   type="button"
                   onClick={() => handleBackupToggle(item.key as any)}
                   className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
-                    active ? 'bg-emerald-500' : 'bg-neutral-800'
+                    active ? 'bg-black' : 'bg-neutral-300'
                   }`}
                 >
                   <div

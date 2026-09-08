@@ -3,7 +3,7 @@ import {
   Play,
   Pause,
   RotateCcw,
-  Sparkles,
+  FileText,
   Volume2,
   VolumeX,
   FileAudio,
@@ -311,8 +311,8 @@ export const AudioVoicePlayer: React.FC<AudioVoicePlayerProps> = ({
                 onClick={() => setShowTranscription(!showTranscription)}
                 className="flex items-center gap-1 hover:underline"
               >
-                <Sparkles className="w-3 h-3" />
-                <span>AI Transcript {showTranscription ? '▼' : '▶'}</span>
+                <FileText className="w-3 h-3" />
+                <span>Transcript {showTranscription ? '▼' : '▶'}</span>
               </button>
               <span className={`text-[9px] font-mono ${isOwn ? 'text-white/60' : 'text-neutral-400'}`}>
                 Whisper AI
@@ -341,11 +341,11 @@ export const AudioVoicePlayer: React.FC<AudioVoicePlayerProps> = ({
                   : 'bg-black/[0.05] hover:bg-black/[0.1] text-neutral-900 border-black/[0.1]'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <FileText className="w-3.5 h-3.5" />
               <span>
                 {isTranscribing
-                  ? 'Transcribing audio via AI...'
-                  : 'Transcribe with AI'}
+                  ? 'Transcribing audio...'
+                  : 'Transcribe audio'}
               </span>
             </button>
           </div>

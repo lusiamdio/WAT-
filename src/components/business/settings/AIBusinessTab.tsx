@@ -1,15 +1,5 @@
 import React from 'react';
-import {
-  Sparkles,
-  Bot,
-  Sliders,
-  Shield,
-  FileText,
-  CheckCircle2,
-  Brain,
-  MessageSquare,
-  Zap,
-} from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { WATBusinessSettings } from '../../../types/businessSettings';
 
 interface Props {
@@ -48,91 +38,87 @@ export const AIBusinessTab: React.FC<Props> = ({
         },
       },
     }));
-    showToast(`AI capability updated: ${String(actionKey)}`);
+    showToast(`Assistant capability updated: ${String(actionKey)}`);
   };
 
   return (
-    <div className="space-y-8 animate-fade-in text-neutral-200">
-      {/* 22. AI Assistant & Intelligence */}
-      <section className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-6 shadow-lg space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-800">
+    <div className="space-y-8 animate-fade-in text-neutral-900">
+      {/* Automated Assistant & Intelligence */}
+      <section className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3">
           <div>
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-400" />
-              <h3 className="text-base font-bold text-neutral-100">22. 🤖 AI Assistant & Gemini Sales Copilot</h3>
-            </div>
-            <p className="text-xs text-neutral-400 mt-0.5">
-              Configure your autonomous customer-facing AI agent, personality tone, knowledge base, and actions.
+            <h3 className="text-base font-bold text-neutral-900">Automated Assistant & Knowledge Base</h3>
+            <p className="text-xs text-neutral-500 mt-0.5">
+              Configure customer-facing automated responses, interaction style, knowledge base, and actions.
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => handleAIChange('aiAssistantEnabled', !ai.aiAssistantEnabled)}
-            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all shadow-md ${
+            className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all shadow-sm ${
               ai.aiAssistantEnabled
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-neutral-950 font-bold shadow-amber-500/20'
-                : 'bg-neutral-800 text-neutral-400'
+                ? 'bg-black text-white'
+                : 'bg-neutral-200 text-neutral-600'
             }`}
           >
-            {ai.aiAssistantEnabled ? 'AI AGENT ACTIVE' : 'AI DISABLED'}
+            {ai.aiAssistantEnabled ? 'Active' : 'Disabled'}
           </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
-              AI Assistant Persona Name
+            <label className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
+              Assistant Persona Name
             </label>
             <input
               type="text"
               value={ai.aiCopilotName}
               onChange={(e) => handleAIChange('aiCopilotName', e.target.value)}
-              className="w-full mt-1.5 bg-neutral-950 border border-neutral-800 focus:border-amber-500 rounded-2xl px-3.5 py-2.5 text-xs text-neutral-100 outline-none"
+              className="w-full mt-1.5 bg-white shadow-sm rounded-2xl px-3.5 py-2.5 text-xs text-neutral-900 outline-none"
             />
           </div>
 
           <div>
-            <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
+            <label className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
               Personality & Interaction Style
             </label>
             <select
               value={ai.personality}
               onChange={(e: any) => handleAIChange('personality', e.target.value)}
-              className="w-full mt-1.5 bg-neutral-950 border border-neutral-800 focus:border-amber-500 rounded-2xl px-3.5 py-2.5 text-xs text-neutral-100 outline-none"
+              className="w-full mt-1.5 bg-white shadow-sm rounded-2xl px-3.5 py-2.5 text-xs text-neutral-900 outline-none"
             >
               <option value="warm_friendly">Warm & Welcoming Concierge</option>
               <option value="professional">Strictly Professional & Formal</option>
-              <option value="persuasive">Persuasive High-Conversion Sales Closer</option>
-              <option value="empathetic">Empathetic Customer Support Specialist</option>
+              <option value="persuasive">Persuasive Sales Advisor</option>
+              <option value="empathetic">Customer Support Specialist</option>
               <option value="casual">Casual & Direct</option>
             </select>
           </div>
 
           <div className="md:col-span-2">
-            <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center justify-between">
-              <span>Business Knowledge Base (Context Fed to Gemini)</span>
-              <span className="text-[10px] text-amber-400 font-mono">Real-time Grounding</span>
+            <label className="text-xs font-bold text-neutral-700 uppercase tracking-wider block">
+              Business Knowledge Base & Guidelines
             </label>
             <textarea
               rows={4}
               value={ai.businessKnowledgeBase}
               onChange={(e) => handleAIChange('businessKnowledgeBase', e.target.value)}
-              className="w-full mt-1.5 bg-neutral-950 border border-neutral-800 focus:border-amber-500 rounded-2xl p-3.5 text-xs text-neutral-100 outline-none leading-relaxed"
+              className="w-full mt-1.5 bg-white shadow-sm rounded-2xl p-3.5 text-xs text-neutral-900 outline-none leading-relaxed"
             />
           </div>
         </div>
 
-        {/* Permitted AI Actions */}
-        <div className="pt-4 border-t border-neutral-800 space-y-3">
-          <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wider">
+        {/* Permitted Actions */}
+        <div className="pt-4 space-y-3">
+          <h4 className="text-xs font-bold text-neutral-700 uppercase tracking-wider">
             Autonomous Actions & Permissions
           </h4>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {[
-              { key: 'suggestProducts', label: 'Suggest Products & Cross-sell' },
-              { key: 'generateInvoices', label: 'Generate M-Pesa & MoMo Invoices' },
+              { key: 'suggestProducts', label: 'Suggest Products & Recommendations' },
+              { key: 'generateInvoices', label: 'Generate Mobile Money Invoices' },
               { key: 'bookAppointments', label: 'Book Calendar Appointments' },
               { key: 'answerFaqs', label: 'Answer FAQs from Knowledge Base' },
               { key: 'qualifyLeads', label: 'Score & Tag High-Value Leads' },
@@ -144,15 +130,15 @@ export const AIBusinessTab: React.FC<Props> = ({
                   key={action.key}
                   type="button"
                   onClick={() => handleActionToggle(action.key as any)}
-                  className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
+                  className={`p-3 rounded-2xl text-left flex items-center justify-between transition-all ${
                     active
-                      ? 'bg-amber-500/10 border-amber-500/40 text-amber-300'
-                      : 'bg-neutral-950 border-neutral-800 text-neutral-500'
+                      ? 'bg-black text-white'
+                      : 'bg-white shadow-sm text-neutral-600'
                   }`}
                 >
                   <span className="text-xs font-medium">{action.label}</span>
                   <CheckCircle2
-                    className={`w-4 h-4 shrink-0 ${active ? 'text-amber-400' : 'text-neutral-700'}`}
+                    className={`w-4 h-4 shrink-0 ${active ? 'text-white' : 'text-neutral-400'}`}
                   />
                 </button>
               );
@@ -160,26 +146,26 @@ export const AIBusinessTab: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* AI Safeguards & Handover */}
-        <div className="pt-4 border-t border-neutral-800 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-1">
-            <div className="text-[11px] font-bold text-neutral-400">Confidence Threshold</div>
-            <div className="text-lg font-bold font-mono text-emerald-400">
+        {/* Safeguards & Team Escalation */}
+        <div className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-4 rounded-2xl bg-white shadow-sm space-y-1">
+            <div className="text-[11px] font-bold text-neutral-500">Confidence Threshold</div>
+            <div className="text-lg font-bold font-mono text-neutral-900">
               {ai.confidenceThresholdPercent}%
             </div>
-            <p className="text-[10px] text-neutral-500">Hands over to human if AI confidence is lower</p>
+            <p className="text-[10px] text-neutral-500">Escalates to staff if match confidence is lower</p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-1">
-            <div className="text-[11px] font-bold text-neutral-400">Human Handover Trigger</div>
-            <div className="text-sm font-bold text-amber-300">Instant Alert</div>
-            <p className="text-[10px] text-neutral-500">Notifies staff when customer asks for human</p>
+          <div className="p-4 rounded-2xl bg-white shadow-sm space-y-1">
+            <div className="text-[11px] font-bold text-neutral-500">Staff Handover Trigger</div>
+            <div className="text-sm font-bold text-neutral-900">Instant Alert</div>
+            <p className="text-[10px] text-neutral-500">Notifies team members when customer requests a representative</p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 space-y-1">
-            <div className="text-[11px] font-bold text-neutral-400">Data Training Privacy</div>
-            <div className="text-sm font-bold text-emerald-400">Protected & Opted Out</div>
-            <p className="text-[10px] text-neutral-500">Chats never used to train public foundation models</p>
+          <div className="p-4 rounded-2xl bg-white shadow-sm space-y-1">
+            <div className="text-[11px] font-bold text-neutral-500">Data Privacy</div>
+            <div className="text-sm font-bold text-neutral-900">Protected & Confidential</div>
+            <p className="text-[10px] text-neutral-500">Customer conversations are end-to-end secured and private</p>
           </div>
         </div>
       </section>

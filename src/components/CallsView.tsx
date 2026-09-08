@@ -103,7 +103,7 @@ export const CallsView: React.FC = () => {
             <div className="space-y-1.5 max-w-lg">
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-1 rounded-full bg-black/[0.04] text-neutral-800 border border-black/[0.08] text-[10px] font-mono font-bold">
-                  ✨ HD VOICE & VIDEO CALLS
+                  HD VOICE & VIDEO CALLS
                 </span>
                 <span className="text-xs text-emerald-600 font-bold">End-to-End Encrypted</span>
               </div>

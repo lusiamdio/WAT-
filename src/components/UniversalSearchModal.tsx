@@ -7,7 +7,7 @@ import {
   Building2,
   FileText,
   CreditCard,
-  Sparkles,
+  Brain,
   ArrowRight,
   Send,
   Clock,
@@ -74,7 +74,7 @@ export const UniversalSearchModal: React.FC = () => {
           title: u.name,
           subtitle: `${u.handle} • ${u.statusMessage}`,
           avatar: u.avatar,
-          metadata: u.isOnline ? '🟢 Online' : 'Last seen recently',
+          metadata: u.isOnline ? 'Online' : 'Last seen recently',
           action: () => {
             const matchingRoom = rooms.find((r) => r.type === 'direct' && r.memberIds.includes(u.id));
             if (matchingRoom) {
@@ -223,7 +223,7 @@ export const UniversalSearchModal: React.FC = () => {
             { id: 'businesses', label: 'Businesses' },
             { id: 'files', label: 'Files & Docs' },
             { id: 'payments', label: 'Payments' },
-            { id: 'ai', label: '✦ Ask AI' },
+            { id: 'ai', label: 'Assistant' },
           ].map((f) => (
             <button
               key={f.id}
@@ -254,7 +254,7 @@ export const UniversalSearchModal: React.FC = () => {
               const getIcon = () => {
                 switch (res.category) {
                   case 'ai':
-                    return <Sparkles className="w-4 h-4 text-neutral-800" />;
+                    return <Brain className="w-4 h-4 text-neutral-800" />;
                   case 'people':
                     return <User className="w-4 h-4 text-neutral-800" />;
                   case 'messages':

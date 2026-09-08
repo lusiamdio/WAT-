@@ -9,7 +9,6 @@ import {
   ArrowUpRight,
   ShieldCheck,
   ChevronRight,
-  Wallet,
 } from 'lucide-react';
 import { useChat } from '../../context/ChatContext';
 import {
@@ -78,7 +77,7 @@ export const RealTimeCurrencyExchangeCard: React.FC = () => {
               <Zap className="w-4 h-4" />
             </span>
             <h3 className="text-base font-black text-neutral-900 dark:text-white tracking-tight">
-              Real-Time Currency Exchange & Multi-Currency Vault
+              Real-Time Currency Exchange
             </h3>
           </div>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 font-mono">
@@ -190,62 +189,6 @@ export const RealTimeCurrencyExchangeCard: React.FC = () => {
               </option>
             ))}
           </select>
-        </div>
-      </div>
-
-      {/* Multi-Currency Balances Overview */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs font-bold text-neutral-800 dark:text-neutral-200">
-          <span className="flex items-center gap-1.5">
-            <Wallet className="w-3.5 h-3.5 text-neutral-600 dark:text-neutral-400" />
-            <span>Multi-Currency Vault Holdings</span>
-          </span>
-          <span className="text-neutral-400 font-mono text-[11px]">
-            Real-Time Matrix Ledgers
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
-          {Object.values(SUPPORTED_CURRENCIES).slice(0, 10).map((curr) => {
-            const bal = walletBalances[curr.code] ?? 0;
-            const isSelected = walletCurrency === curr.code;
-            return (
-              <div
-                key={curr.code}
-                className={`p-3 rounded-2xl border transition-all relative group cursor-pointer ${
-                  isSelected
-                    ? 'border-black dark:border-white bg-black/[0.03] dark:bg-white/[0.06] shadow-sm'
-                    : 'border-black/[0.06] dark:border-white/[0.06] bg-white dark:bg-white/[0.02] hover:border-black/20 dark:hover:border-white/20'
-                }`}
-                onClick={() => setWalletCurrency(curr.code as any)}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-base">{curr.flag}</span>
-                  <span className="text-[10px] font-mono font-bold text-neutral-500 dark:text-neutral-400">
-                    {curr.code}
-                  </span>
-                </div>
-                <div className="font-mono font-black text-xs text-neutral-900 dark:text-white truncate">
-                  {curr.symbol}
-                  {bal.toLocaleString('en-US', {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2,
-                  })}
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openExchangeModal(curr.code, curr.code === 'USD' ? 'ZAR' : 'USD');
-                  }}
-                  className="mt-2 w-full py-1 text-[10px] font-mono font-bold rounded-lg bg-black/[0.04] dark:bg-white/[0.06] group-hover:bg-emerald-500/10 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors flex items-center justify-center gap-1"
-                >
-                  <span>Exchange</span>
-                  <ArrowUpRight className="w-2.5 h-2.5" />
-                </button>
-              </div>
-            );
-          })}
         </div>
       </div>
     </div>

@@ -84,9 +84,9 @@ export const ChatArea: React.FC = () => {
   const [showDisappearingMenu, setShowDisappearingMenu] = useState(false);
   const [showSmartReplies, setShowSmartReplies] = useState(true);
   const [smartReplies, setSmartReplies] = useState<string[]>([
-    'Sounds great! 👍',
-    'Received with thanks',
-    'Let me check on this 🚀',
+    'Sounds great.',
+    'Received with thanks.',
+    'Let me check on this.',
   ]);
   const [isRecordingVoice, setIsRecordingVoice] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
@@ -377,7 +377,7 @@ export const ChatArea: React.FC = () => {
   const handleSendLocation = () => {
     setShowAttachmentMenu(false);
     sendMessage({
-      text: '📍 Live location shared',
+      text: 'Live location shared',
       type: 'location',
       locationInfo: {
         latitude: -1.2921,
@@ -1104,7 +1104,7 @@ export const ChatArea: React.FC = () => {
                 const roomClean = `wat-${activeRoom.id.replace(/[^a-zA-Z0-9]/g, '')}`;
                 sendMessage(
                   activeRoom.id,
-                  `📹 Jitsi Video Conference Meeting Link: https://${jitsiServerConfig.serverDomain}/${roomClean}\nJoin securely via web or Jitsi Meet mobile app (E2EE Active).`
+                  `Jitsi Video Conference Meeting Link: https://${jitsiServerConfig.serverDomain}/${roomClean}\nJoin securely via web or Jitsi Meet mobile app (E2EE Active).`
                 );
               }}
               className="flex flex-col items-center p-2.5 rounded-2xl hover:bg-black/[0.04] text-neutral-800 gap-1 transition-colors"

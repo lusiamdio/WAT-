@@ -12,7 +12,6 @@ import {
   Smartphone,
   ChevronRight,
   MessageSquare,
-  Sparkles,
   Printer,
   X,
 } from 'lucide-react';
@@ -92,7 +91,7 @@ export const WATPaymentSuccessModal: React.FC<Props> = ({
             </motion.div>
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-emerald-100 text-xs font-semibold uppercase tracking-wider mb-2 border border-white/20">
-              <Sparkles className="w-3.5 h-3.5" />
+              <ShieldCheck className="w-3.5 h-3.5" />
               <span>WAT Verified Settlement</span>
             </div>
 

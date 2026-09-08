@@ -3,7 +3,7 @@ import {
   AlertCircle,
   Calendar,
   CreditCard,
-  Sparkles,
+  Search,
   ChevronDown,
   ChevronUp,
   X,
@@ -78,7 +78,7 @@ export const PriorityHub: React.FC = () => {
             className="p-2 rounded-xl bg-neutral-800/80 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors"
             title="Universal Search (⌘K)"
           >
-            <span className="text-xs">🔍</span>
+            <Search className="w-4 h-4 text-neutral-300" />
           </button>
 
           <button
@@ -185,7 +185,7 @@ export const PriorityHub: React.FC = () => {
           </p>
         </button>
 
-        {/* 4. ✦ AI Brief */}
+        {/* 4. Executive Brief */}
         <button
           type="button"
           onClick={() => toggleCard('aibrief')}
@@ -196,9 +196,8 @@ export const PriorityHub: React.FC = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-1.5 text-xs font-bold text-purple-300">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              AI Brief
+            <span className="text-xs font-bold text-purple-300">
+              Executive Brief
             </span>
             {activeCard === 'aibrief' ? (
               <ChevronUp className="w-3.5 h-3.5 text-purple-400" />
@@ -296,7 +295,7 @@ export const PriorityHub: React.FC = () => {
                 <div>
                   <h4 className="text-xs font-bold text-neutral-200">{m.title}</h4>
                   <p className="text-[11px] text-blue-300 font-medium mt-0.5">
-                    ⏰ {m.time}
+                    {m.time}
                   </p>
                 </div>
                 <button
@@ -361,9 +360,8 @@ export const PriorityHub: React.FC = () => {
       {activeCard === 'aibrief' && (
         <div className="mt-2 p-3.5 bg-purple-950/20 border border-purple-800/40 rounded-2xl space-y-2.5 animate-fade-in">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              ✦ 24-Hour AI Ecosystem Intelligence
+            <span className="text-xs font-bold text-purple-300">
+              24-Hour Ecosystem Intelligence Brief
             </span>
             <button
               onClick={() => setActiveCard('none')}

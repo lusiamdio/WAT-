@@ -358,8 +358,8 @@ export const ChatList: React.FC = () => {
 
       {/* Gesture Hint for Mobile */}
       <div className="px-3 py-1 bg-black/[0.02] text-[10px] text-neutral-400 flex items-center justify-between border-b border-black/[0.04]">
-        <span>👈 Swipe left to archive</span>
-        <span>Swipe right to pin 👉</span>
+        <span>Swipe left to archive</span>
+        <span>Swipe right to pin</span>
       </div>
 
       {/* Room list */}

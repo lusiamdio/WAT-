@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Sparkles,
+  Terminal,
   Send,
   X,
   Mic,
@@ -152,7 +152,7 @@ export const CommandCenterModal: React.FC = () => {
         setActiveTab('calls');
         setExecutionResult(`✓ Generated WebRTC conference bridge and navigated to Calling hub.`);
       } else {
-        setExecutionResult(`✦ WAT AI executed: "${inputPrompt}". Action dispatched across Matrix federated nodes.`);
+        setExecutionResult(`Command executed: "${inputPrompt}". Action dispatched across Matrix federated nodes.`);
       }
       try {
         confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
@@ -186,7 +186,7 @@ export const CommandCenterModal: React.FC = () => {
         <div className="p-5 border-b border-black/[0.06] flex items-center justify-between bg-white/80">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-black text-white flex items-center justify-center shadow-sm font-bold">
-              <Sparkles className="w-5 h-5" />
+              <Terminal className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-black text-neutral-900 flex items-center gap-2">

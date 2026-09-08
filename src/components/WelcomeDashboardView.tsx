@@ -546,7 +546,7 @@ export const WelcomeDashboardView: React.FC = () => {
 
                   {priorityUrgent.length === 0 ? (
                     <div className="py-6 text-center text-xs text-neutral-500">
-                      🎉 All urgent tasks and VIP messages are cleared!
+                      All urgent tasks and messages are cleared.
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -621,7 +621,7 @@ export const WelcomeDashboardView: React.FC = () => {
                               {m.time}
                             </span>
                             <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-black/[0.05] text-neutral-700">
-                              {m.type === 'video' ? '📹 Video SFU' : '🎙️ Audio Mesh'}
+                              {m.type === 'video' ? 'Video SFU' : 'Audio Mesh'}
                             </span>
                           </div>
                           <h4 className="text-xs font-bold text-neutral-900 mt-1">
@@ -697,19 +697,16 @@ export const WelcomeDashboardView: React.FC = () => {
                 )}
               </div>
 
-              {/* Right Column: AI 24h Intelligence Digest & System Status */}
+              {/* Right Column: Executive Digest & System Status */}
               <div className="space-y-5">
-                {/* AI Workspace Brief */}
+                {/* Workspace Brief */}
                 <div className="bg-white/90 border border-black/[0.08] rounded-3xl p-5 shadow-sm space-y-4">
                   <div className="flex items-center justify-between pb-2 border-b border-black/[0.06]">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-neutral-800" />
-                      <h3 className="text-sm font-bold text-neutral-900">
-                        24h AI Intelligence Brief
-                      </h3>
-                    </div>
+                    <h3 className="text-sm font-bold text-neutral-900">
+                      24h Workspace Executive Brief
+                    </h3>
                     <span className="text-[10px] font-mono text-neutral-700 bg-black/[0.05] px-2 py-0.5 rounded-full">
-                      Gemini Live
+                      Executive Digest
                     </span>
                   </div>
 
@@ -1024,7 +1021,7 @@ export const WelcomeDashboardView: React.FC = () => {
 
               {priorityUrgent.length === 0 ? (
                 <div className="py-8 text-center text-sm text-neutral-500">
-                  🎉 No pending urgent actions. You are completely caught up!
+                  No pending urgent actions. You are completely caught up.
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -1070,15 +1067,14 @@ export const WelcomeDashboardView: React.FC = () => {
               )}
             </div>
 
-            {/* AI Summary Card */}
+            {/* Executive Summary Card */}
             <div className="bg-white/90 border border-black/[0.08] rounded-3xl p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-black/[0.06]">
-                <h3 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-neutral-800" />
-                  <span>24-Hour Executive AI Briefing</span>
+                <h3 className="text-base font-bold text-neutral-900">
+                  24-Hour Executive Workspace Briefing
                 </h3>
                 <span className="text-xs font-mono text-neutral-700 bg-black/[0.05] px-2.5 py-1 rounded-full">
-                  Synthesized via Gemini
+                  Executive Digest
                 </span>
               </div>
 

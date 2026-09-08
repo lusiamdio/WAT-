@@ -10,7 +10,8 @@ import {
   Shield,
   Smartphone,
   Bell,
-  Sparkles,
+  Camera,
+  Compass,
   CheckCircle2,
   Copy,
   Check,
@@ -38,7 +39,6 @@ import {
 import { useChat } from '../context/ChatContext';
 import { soundEngine } from '../utils/audioSynth';
 import { SocialLink, CareerItem, EducationItem } from '../types';
-import { RealTimeCurrencyExchangeCard } from './wallet/RealTimeCurrencyExchangeCard';
 
 type YouTab = 'wallet' | 'profile' | 'posts' | 'settings';
 
@@ -250,10 +250,10 @@ export const YouProfileView: React.FC = () => {
         {/* Sub Navigation Tabs */}
         <div className="flex items-center gap-1.5 bg-white/90 dark:bg-black/40 p-1.5 rounded-2xl border border-black/[0.08] dark:border-white/[0.08] overflow-x-auto no-scrollbar shadow-sm">
           {[
-            { id: 'wallet', label: '💳 WAT Wallet', count: `${walletCurrency} ${walletBalance.toLocaleString()}` },
-            { id: 'profile', label: '👤 About & Bio' },
-            { id: 'posts', label: '✨ Posts & Media' },
-            { id: 'settings', label: '🔒 Security & Settings' },
+            { id: 'wallet', label: 'Wallet', count: `${walletCurrency} ${walletBalance.toLocaleString()}` },
+            { id: 'profile', label: 'About & Bio' },
+            { id: 'posts', label: 'Posts & Media' },
+            { id: 'settings', label: 'Security & Settings' },
           ].map((t) => (
             <button
               key={t.id}
@@ -292,7 +292,7 @@ export const YouProfileView: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs font-bold text-neutral-800 dark:text-neutral-200 uppercase font-mono tracking-wider">
                   <Wallet className="w-4 h-4 text-neutral-900 dark:text-white" />
-                  <span>Sovereign Mobile Money & Multi-Currency Vault</span>
+                  <span>Sovereign Mobile Money & Digital Wallet</span>
                 </div>
                 <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
                   {(['ZAR', 'USD', 'NGN', 'EUR', 'GBP', 'KES', 'GHS', 'EGP', 'WAT'] as const).map((curr) => (
@@ -388,9 +388,6 @@ export const YouProfileView: React.FC = () => {
                 </button>
               </div>
             </div>
-
-            {/* Real-Time Currency Exchange Card with Live Forex Ticker & Converter */}
-            <RealTimeCurrencyExchangeCard />
 
             {/* Recent Transactions List */}
             <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-black/[0.08] p-6 space-y-4 shadow-[0_16px_40px_rgba(0,0,0,0.06)]">
@@ -628,7 +625,7 @@ export const YouProfileView: React.FC = () => {
         {/* 3. POSTS TAB */}
         {activeSubTab === 'posts' && (
           <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-black/[0.08] p-6 text-center space-y-3 shadow-[0_16px_40px_rgba(0,0,0,0.06)]">
-            <Sparkles className="w-8 h-8 text-neutral-800 mx-auto" />
+            <Camera className="w-8 h-8 text-neutral-800 mx-auto" />
             <h4 className="text-sm font-bold text-neutral-900">24-Hour Stories & Updates</h4>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto">
               Share photos, videos, and product launches with your network.
@@ -714,7 +711,7 @@ export const YouProfileView: React.FC = () => {
               <div className="p-4 rounded-2xl bg-neutral-900 text-white border border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
                 <div className="flex items-center gap-3 text-center sm:text-left">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-5 h-5" />
+                    <Compass className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 justify-center sm:justify-start">

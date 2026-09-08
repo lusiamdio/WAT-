@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Sparkles,
   Send,
   Languages,
   FileText,
@@ -69,7 +68,7 @@ export const AIWorkspaceView: React.FC = () => {
 
     setTimeout(() => {
       setIsProcessing(false);
-      let reply = `✦ WAT AI Analysis: Based on your Matrix logs and business ledger, here are the key insights regarding "${userMsg}":`;
+      let reply = `WAT Analysis: Based on your Matrix logs and business ledger, here are the key insights regarding "${userMsg}":`;
       if (userMsg.toLowerCase().includes('revenue') || userMsg.toLowerCase().includes('wallet')) {
         reply = `Your current balance is R24,850.00 with R127,450 revenue recorded this month across 17 wholesale orders. All settlements are backed by verifiable transaction hashes.`;
       } else if (userMsg.toLowerCase().includes('john')) {
@@ -91,7 +90,7 @@ export const AIWorkspaceView: React.FC = () => {
     setTimeout(() => {
       const room = rooms.find((r) => r.id === selectedRoomToSummarize);
       setSummaryOutput(
-        `✦ Executive Summary for "${room?.name || 'Selected Room'}":\n• 3 key decisions made regarding infrastructure scaling & sliding-sync deployment.\n• Delivery confirmed for Thursday before 14:00.\n• Next step: Approve PR and send invoice receipt.`
+        `Executive Summary for "${room?.name || 'Selected Room'}":\n• 3 key decisions made regarding infrastructure scaling & sliding-sync deployment.\n• Delivery confirmed for Thursday before 14:00.\n• Next step: Approve PR and send invoice receipt.`
       );
       setIsProcessing(false);
     }, 600);
@@ -127,7 +126,7 @@ export const AIWorkspaceView: React.FC = () => {
       } else if (composerTone === 'Concise') {
         setComposerOutput(`Confirmed for Thursday before 14:00. Revised proposal is on the way.`);
       } else if (composerTone === 'Friendly') {
-        setComposerOutput(`Awesome, thanks so much! Thursday sounds great to me. Excited to collaborate! 😊`);
+        setComposerOutput(`Awesome, thanks so much! Thursday sounds great to me. Excited to collaborate!`);
       } else {
         setComposerOutput(`Approved. Let's proceed as scheduled on Thursday.`);
       }
@@ -150,21 +149,21 @@ export const AIWorkspaceView: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shadow-md">
-                <Sparkles className="w-4 h-4" />
+                <Brain className="w-4 h-4" />
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-neutral-900">
                 WAT Intelligence Suite
               </h1>
             </div>
             <p className="text-xs text-neutral-500 mt-1">
-              Context-aware LLM, universal translation, conversation synthesizer & executive business copilot
+              Context-aware assistant, universal translation, conversation synthesizer & executive business tools
             </p>
           </div>
 
           {/* Tool Navigation Pills */}
           <div className="flex items-center gap-1.5 bg-white/90 p-1.5 rounded-2xl border border-black/[0.08] overflow-x-auto no-scrollbar shadow-sm">
             {[
-              { id: 'ask', label: 'Ask AI', icon: <Bot className="w-3.5 h-3.5" /> },
+              { id: 'ask', label: 'Assistant', icon: <MessageSquare className="w-3.5 h-3.5" /> },
               { id: 'summarize', label: 'Summarizer', icon: <Layers className="w-3.5 h-3.5" /> },
               { id: 'translate', label: 'Translator', icon: <Languages className="w-3.5 h-3.5" /> },
               { id: 'compose', label: 'Composer', icon: <FileText className="w-3.5 h-3.5" /> },
@@ -203,7 +202,7 @@ export const AIWorkspaceView: React.FC = () => {
                   >
                     {item.sender === 'ai' && (
                       <div className="w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
-                        <Sparkles className="w-4 h-4" />
+                        <Brain className="w-4 h-4" />
                       </div>
                     )}
                     <div
@@ -222,8 +221,8 @@ export const AIWorkspaceView: React.FC = () => {
                 ))}
                 {isProcessing && (
                   <div className="flex items-center gap-2 text-xs text-neutral-600 p-2 font-semibold animate-pulse">
-                    <Sparkles className="w-4 h-4 text-black" />
-                    WAT AI is analyzing workspace records...
+                    <Brain className="w-4 h-4 text-black" />
+                    Assistant is analyzing workspace records...
                   </div>
                 )}
               </div>
@@ -243,7 +242,7 @@ export const AIWorkspaceView: React.FC = () => {
                     }}
                     className="px-3 py-1.5 rounded-xl bg-black/[0.04] hover:bg-black/[0.08] text-neutral-800 text-[11px] whitespace-nowrap font-medium transition-colors border border-black/[0.06]"
                   >
-                    ✦ {p}
+                    {p}
                   </button>
                 ))}
               </div>

@@ -50,7 +50,7 @@ export const ShareProductModal: React.FC<ShareProductModalProps> = ({
         ? 'FREE'
         : `${product.currency} ${product.price}`;
       setStatusCaption(
-        `🛍️ Now in Stock: ${product.name} (${priceDisplay})\n${product.description}`
+        `Now in Stock: ${product.name} (${priceDisplay})\n${product.description}`
       );
     }
   }, [product]);

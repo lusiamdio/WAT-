@@ -49,15 +49,12 @@ export const PrivacySecurityTab: React.FC<Props> = ({
   };
 
   return (
-    <div className="space-y-8 animate-fade-in text-neutral-200">
-      {/* 10. Privacy Settings */}
-      <section className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-6 shadow-lg space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-          <div className="flex items-center gap-2">
-            <Eye className="w-5 h-5 text-amber-400" />
-            <h3 className="text-base font-bold text-neutral-100">10. 🛡️ Customer Privacy & Read Receipts</h3>
-          </div>
-          <span className="text-xs font-mono text-emerald-400">ENCRYPTED</span>
+    <div className="space-y-8 animate-fade-in text-neutral-900">
+      {/* Privacy Settings */}
+      <section className="bg-white rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3">
+          <h3 className="text-base font-bold text-neutral-900">Customer Privacy & Read Receipts</h3>
+          <span className="text-xs font-mono text-neutral-600 font-semibold">ENCRYPTED</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -72,17 +69,17 @@ export const PrivacySecurityTab: React.FC<Props> = ({
             return (
               <div
                 key={item.key}
-                className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-between"
+                className="p-4 rounded-2xl bg-white shadow-sm flex items-center justify-between"
               >
                 <div>
-                  <div className="text-xs font-bold text-neutral-200">{item.label}</div>
+                  <div className="text-xs font-bold text-neutral-900">{item.label}</div>
                   <p className="text-[10px] text-neutral-500 mt-0.5">{item.desc}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handlePrivacyToggle(item.key as any)}
                   className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
-                    active ? 'bg-emerald-500' : 'bg-neutral-800'
+                    active ? 'bg-black' : 'bg-neutral-300'
                   }`}
                 >
                   <div
@@ -97,14 +94,11 @@ export const PrivacySecurityTab: React.FC<Props> = ({
         </div>
       </section>
 
-      {/* 11. Security Settings */}
-      <section className="bg-neutral-900/90 border border-neutral-800 rounded-3xl p-6 shadow-lg space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
-          <div className="flex items-center gap-2">
-            <Lock className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-base font-bold text-neutral-100">11. 🔐 Security & Two-Step Verification</h3>
-          </div>
-          <span className="text-xs font-mono text-emerald-400">HARDENED</span>
+      {/* Security Settings */}
+      <section className="bg-white rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center justify-between pb-3">
+          <h3 className="text-base font-bold text-neutral-900">Security & Two-Step Verification</h3>
+          <span className="text-xs font-mono text-neutral-600 font-semibold">HARDENED</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -119,17 +113,17 @@ export const PrivacySecurityTab: React.FC<Props> = ({
             return (
               <div
                 key={item.key}
-                className="p-4 rounded-2xl bg-neutral-950 border border-neutral-800 flex items-center justify-between"
+                className="p-4 rounded-2xl bg-white shadow-sm flex items-center justify-between"
               >
                 <div>
-                  <div className="text-xs font-bold text-neutral-200">{item.label}</div>
+                  <div className="text-xs font-bold text-neutral-900">{item.label}</div>
                   <p className="text-[10px] text-neutral-500 mt-0.5">{item.desc}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleSecurityToggle(item.key as any)}
                   className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
-                    active ? 'bg-emerald-500' : 'bg-neutral-800'
+                    active ? 'bg-black' : 'bg-neutral-300'
                   }`}
                 >
                   <div

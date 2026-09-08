@@ -8,7 +8,7 @@ import {
   TrendingUp,
   PackageCheck,
   Send,
-  Sparkles,
+  Brain,
   Bot,
   Tag,
   Shield,
@@ -112,7 +112,7 @@ const BUSINESS_SETTINGS_LIST: BusinessSettingCard[] = [
     id: 'ai_assistant',
     label: 'AI Sales Assistant (Gemini Pro)',
     categoryNumber: '9',
-    icon: Sparkles,
+    icon: Brain,
     badge: 'Gemini Pro',
     description: 'Autonomous catalog advisor, product recommendation & conversational upsells',
   },
@@ -248,7 +248,7 @@ export const BusinessSuiteView: React.FC = () => {
                       : 'text-neutral-600 hover:text-black hover:bg-black/[0.04]'
                   }`}
                 >
-                  {tab === 'settings_hub' ? '⚙️ Settings Hub' : tab}
+                  {tab === 'settings_hub' ? 'Settings Hub' : tab}
                 </button>
               ))}
             </div>
@@ -276,7 +276,7 @@ export const BusinessSuiteView: React.FC = () => {
                 30-Day Revenue
               </div>
               <div className="text-lg font-black text-neutral-900">$4,850.00</div>
-              <span className="text-[10px] text-neutral-600 font-medium">⚡ 100% Mobile Money (M-Pesa/MoMo)</span>
+              <span className="text-[10px] text-neutral-600 font-medium">100% Mobile Money (M-Pesa/MoMo)</span>
             </div>
           </div>
 
@@ -345,7 +345,7 @@ export const BusinessSuiteView: React.FC = () => {
                   className="hidden sm:flex px-3 py-2 rounded-2xl bg-black/[0.04] hover:bg-black/[0.08] text-neutral-800 text-xs font-bold items-center gap-1.5 border border-black/[0.08] active:scale-95 transition-all"
                   title="Configure AI Catalog Copilot"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <Brain className="w-3.5 h-3.5 text-neutral-800" />
                   <span>AI Copilot</span>
                 </button>
                 <button

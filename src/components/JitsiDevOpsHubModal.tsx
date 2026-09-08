@@ -367,11 +367,11 @@ set -euo pipefail
 DOMAIN="${jitsiServerConfig.serverDomain}"
 EMAIL="${jitsiServerConfig.letsEncryptEmail}"
 
-echo "🚀 [1/6] Setting Hostname to \${DOMAIN}..."
+echo "[1/6] Setting Hostname to \${DOMAIN}..."
 sudo hostnamectl set-hostname "\${DOMAIN}"
 echo "127.0.0.1 localhost \${DOMAIN}" | sudo tee -a /etc/hosts
 
-echo "🛡️ [2/6] Configuring UFW Firewall for WebRTC..."
+echo "[2/6] Configuring UFW Firewall for WebRTC..."
 sudo ufw allow 22/tcp
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
@@ -380,20 +380,20 @@ sudo ufw allow 3478/udp
 sudo ufw allow 5349/tcp
 sudo ufw --force enable
 
-echo "📦 [3/6] Adding Jitsi Official Repository & GPG Keyring..."
+echo "[3/6] Adding Jitsi Official Repository & GPG Keyring..."
 sudo apt update && sudo apt install -y curl gnupg2 apt-transport-https openjdk-17-jre-headless
 curl -fsSL https://download.jitsi.org/jitsi-key.gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/jitsi-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/jitsi-keyring.gpg] https://download.jitsi.org stable/" | sudo tee /etc/apt/sources.list.d/jitsi-stable.list
 
-echo "⬇️ [4/6] Installing Jitsi Meet Stack (Web, Prosody, Jicofo, JVB2)..."
+echo "[4/6] Installing Jitsi Meet Stack (Web, Prosody, Jicofo, JVB2)..."
 sudo apt update
 sudo debconf-set-selections <<< "jitsi-meet-web-config jitsi-meet/cert-choice select I want to use 'Let's Encrypt' certificates"
 sudo apt install -y jitsi-meet
 
-echo "🔒 [5/6] Provisioning Automated Let's Encrypt TLS Certificate..."
+echo "[5/6] Provisioning Automated Let's Encrypt TLS Certificate..."
 sudo /usr/share/jitsi-meet/scripts/install-letsencrypt-cert.sh --email="\${EMAIL}"
 
-echo "🤝 [6/6] Linking Jitsi Instance with WAT Matrix Homeserver..."
+echo "[6/6] Linking Jitsi Instance with WAT Matrix Homeserver..."
 cat << 'EOF' | sudo tee /etc/prosody/conf.avail/\${DOMAIN}.cfg.lua
 -- Matrix Sovereign Authentication Hook
 VirtualHost "\${DOMAIN}"
@@ -404,7 +404,7 @@ VirtualHost "\${DOMAIN}"
 EOF
 
 sudo systemctl restart prosody jicofo jitsi-videobridge2 nginx
-echo "✅ Sovereign Jitsi Meet installation completed on https://\${DOMAIN}!"`;
+echo "Sovereign Jitsi Meet installation completed on https://\${DOMAIN}!"`;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fade-in select-none">

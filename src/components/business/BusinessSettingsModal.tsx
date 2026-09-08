@@ -296,14 +296,14 @@ export const BusinessSettingsModal: React.FC<Props> = ({
       id="wat-business-settings-page"
       className="fixed inset-0 z-50 bg-white flex flex-col w-full h-full text-neutral-900 select-none overflow-hidden"
     >
-      {/* Top Header */}
-      <header className="px-4 sm:px-8 py-4 bg-white border-b border-black/[0.08] flex items-center justify-between gap-4 shrink-0">
+      {/* Top Header - No border lines */}
+      <header className="px-4 sm:px-8 py-4 bg-white flex items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           {mobileView === 'detail' && (
             <button
               type="button"
               onClick={() => setMobileView('list')}
-              className="md:hidden px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-700 hover:text-black bg-black/[0.05] hover:bg-black/[0.1] transition-colors"
+              className="md:hidden px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-700 hover:text-black bg-neutral-100 hover:bg-neutral-200 transition-colors"
             >
               Back
             </button>
@@ -323,14 +323,14 @@ export const BusinessSettingsModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={handleResetDefaults}
-            className="hidden sm:block px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-500 hover:text-black hover:bg-black/[0.05] transition-colors"
+            className="hidden sm:block px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-500 hover:text-black hover:bg-neutral-100 transition-colors"
           >
             Reset
           </button>
           <button
             type="button"
             onClick={handleCancel}
-            className="px-3.5 py-1.5 rounded-lg border border-black/[0.15] text-xs font-semibold text-neutral-700 hover:bg-black/[0.04] transition-colors"
+            className="px-3.5 py-1.5 rounded-lg bg-neutral-100 text-xs font-semibold text-neutral-700 hover:bg-neutral-200 transition-colors"
           >
             Cancel
           </button>
@@ -344,7 +344,7 @@ export const BusinessSettingsModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={onClose}
-            className="ml-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-500 hover:text-black hover:bg-black/[0.05] transition-colors"
+            className="ml-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-500 hover:text-black hover:bg-neutral-100 transition-colors"
           >
             Close
           </button>
@@ -360,20 +360,20 @@ export const BusinessSettingsModal: React.FC<Props> = ({
 
       {/* Main Body */}
       <div className="flex-1 flex overflow-hidden bg-white">
-        {/* Left Category Sidebar */}
+        {/* Left Category Sidebar - No border lines */}
         <aside
-          className={`w-full md:w-72 lg:w-80 bg-white border-r border-black/[0.08] flex flex-col shrink-0 overflow-hidden ${
+          className={`w-full md:w-72 lg:w-80 bg-white flex flex-col shrink-0 overflow-hidden ${
             mobileView === 'list' ? 'flex' : 'hidden md:flex'
           }`}
         >
-          {/* Search Box */}
-          <div className="p-3 border-b border-black/[0.08]">
+          {/* Search Box - No border lines */}
+          <div className="p-3">
             <input
               type="text"
               placeholder="Search business settings..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-black/[0.12] rounded-lg text-xs text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-black"
+              className="w-full px-3 py-2 bg-neutral-100 rounded-lg text-xs text-neutral-900 placeholder:text-neutral-400 outline-none"
             />
           </div>
 
@@ -389,7 +389,7 @@ export const BusinessSettingsModal: React.FC<Props> = ({
                   className={`w-full p-3 rounded-xl flex items-center justify-between text-left transition-colors ${
                     isSelected
                       ? 'bg-black text-white'
-                      : 'text-neutral-700 hover:text-black hover:bg-black/[0.04]'
+                      : 'text-neutral-700 hover:text-black hover:bg-neutral-100'
                   }`}
                 >
                   <div className="min-w-0">
@@ -403,7 +403,7 @@ export const BusinessSettingsModal: React.FC<Props> = ({
             })}
           </nav>
 
-          <div className="p-3 border-t border-black/[0.08] flex items-center justify-between bg-white">
+          <div className="p-3 flex items-center justify-between bg-white">
             <span className="text-[11px] text-neutral-400">Business Storage</span>
             <button
               type="button"
@@ -417,7 +417,7 @@ export const BusinessSettingsModal: React.FC<Props> = ({
 
         {/* Right Content Panel */}
         <main
-          className={`flex-1 overflow-y-auto p-4 sm:p-8 bg-white ${
+          className={`flex-1 overflow-y-auto p-4 sm:p-8 bg-neutral-50/60 ${
             mobileView === 'detail' ? 'block' : 'hidden md:block'
           }`}
         >

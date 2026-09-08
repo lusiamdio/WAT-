@@ -98,7 +98,7 @@ export const StatusViewerModal: React.FC = () => {
       userAvatar: currentUser.avatar,
       type: 'image',
       contentUrl: newStoryMediaUrl || 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80',
-      caption: newStoryCaption || 'Working on WAT matrix node 🚀',
+      caption: newStoryCaption || 'Working on WAT matrix node',
     });
     setIsPostingStory(false);
     setNewStoryMediaUrl('');

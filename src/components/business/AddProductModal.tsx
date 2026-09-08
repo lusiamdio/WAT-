@@ -7,7 +7,6 @@ import {
   Tag,
   Image as ImageIcon,
   CheckCircle2,
-  Sparkles,
   Package,
   Layers,
   Upload,
@@ -24,12 +23,12 @@ interface AddProductModalProps {
 }
 
 const CURRENCIES = [
-  { code: 'USD', symbol: '$', name: 'US Dollar (USD)', flag: '🇺🇸' },
-  { code: 'EUR', symbol: '€', name: 'Euro (EUR)', flag: '🇪🇺' },
-  { code: 'GBP', symbol: '£', name: 'British Pound (GBP)', flag: '🇬🇧' },
-  { code: 'NGN', symbol: '₦', name: 'Nigerian Naira (NGN)', flag: '🇳🇬' },
-  { code: 'ZAR', symbol: 'R', name: 'South African Rand (ZAR)', flag: '🇿🇦' },
-  { code: 'AOA', symbol: 'Kz', name: 'Angolan Kwanza (AOA)', flag: '🇦🇴' },
+  { code: 'USD', symbol: '$', name: 'US Dollar (USD)' },
+  { code: 'EUR', symbol: '€', name: 'Euro (EUR)' },
+  { code: 'GBP', symbol: '£', name: 'British Pound (GBP)' },
+  { code: 'NGN', symbol: '₦', name: 'Nigerian Naira (NGN)' },
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand (ZAR)' },
+  { code: 'AOA', symbol: 'Kz', name: 'Angolan Kwanza (AOA)' },
 ];
 
 const PRESET_IMAGES = [
@@ -300,7 +299,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
                     >
                       {CURRENCIES.map((c) => (
                         <option key={c.code} value={c.code}>
-                          {c.flag} {c.code} ({c.symbol}) - {c.name}
+                          {c.code} ({c.symbol}) - {c.name}
                         </option>
                       ))}
                     </select>
@@ -344,7 +343,7 @@ export const AddProductModal: React.FC<AddProductModalProps> = ({
               </div>
             ) : (
               <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <div className="text-xs">
                   <span className="font-bold">Free Product / Sample:</span> Listed at no monetary
                   cost. Customers can request or download directly in chat.

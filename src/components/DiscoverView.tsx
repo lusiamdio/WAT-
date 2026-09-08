@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
   Search,
-  Sparkles,
   MapPin,
   Star,
   Users,
@@ -86,7 +85,7 @@ export const DiscoverView: React.FC = () => {
         <div className="relative rounded-3xl bg-white/90 backdrop-blur-2xl border border-black/[0.08] p-6 sm:p-8 overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.06)]">
           <div className="relative z-10 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/[0.05] text-neutral-800 border border-black/[0.08] text-xs font-bold mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
+              <Compass className="w-3.5 h-3.5" />
               WAT Social & Commerce Discovery Engine
             </div>
             <h1 className="text-2xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight leading-tight">

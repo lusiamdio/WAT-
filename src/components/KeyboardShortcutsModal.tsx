@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Command, Search, Sparkles, MessageSquare, Plus, ArrowRight, ShieldCheck, Phone, Zap } from 'lucide-react';
+import { X, Command, Search, Terminal, MessageSquare, Plus, ArrowRight, ShieldCheck, Phone, Zap } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 
 interface KeyboardShortcutsModalProps {
@@ -34,7 +34,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
         {
           keys: [`${modKey}J`],
           description: 'Launch WAT AI Copilot & Voice Command Center',
-          icon: Sparkles,
+          icon: Terminal,
           action: () => {
             onClose();
             setIsCommandCenterOpen(true);
