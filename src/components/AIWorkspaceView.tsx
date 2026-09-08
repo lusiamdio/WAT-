@@ -16,11 +16,21 @@ import {
   Brain,
   Sliders,
   ShieldCheck,
+  Globe,
+  MapPin,
+  Sparkles,
+  Radio,
+  Compass,
+  ExternalLink,
+  Search,
 } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 import { soundEngine } from '../utils/audioSynth';
+import { GoogleGroundingModal } from './ai/GoogleGroundingModal';
+import { AudioTranscribeModal } from './ai/AudioTranscribeModal';
+import { GeminiLiveVoiceModal } from './ai/GeminiLiveVoiceModal';
 
-type AITool = 'ask' | 'summarize' | 'translate' | 'compose';
+type AITool = 'ask' | 'grounding' | 'live-voice' | 'transcribe' | 'summarize' | 'translate' | 'compose';
 
 export const AIWorkspaceView: React.FC = () => {
   const {
@@ -56,6 +66,12 @@ export const AIWorkspaceView: React.FC = () => {
   const [composerOutput, setComposerOutput] = useState(
     "Thanks, John. Thursday works perfectly for the strategy kickoff. I'll review the updated milestone deliverables and transmit our approval before 14:00."
   );
+
+  // Grounding, Live Voice, Transcribe modal controls
+  const [isGroundingOpen, setIsGroundingOpen] = useState(false);
+  const [groundingTab, setGroundingTab] = useState<'search' | 'maps'>('search');
+  const [isLiveVoiceOpen, setIsLiveVoiceOpen] = useState(false);
+  const [isTranscribeOpen, setIsTranscribeOpen] = useState(false);
 
   const handleAskSubmit = () => {
     if (!askQuery.trim()) return;
@@ -164,6 +180,9 @@ export const AIWorkspaceView: React.FC = () => {
           <div className="flex items-center gap-1.5 bg-white/90 p-1.5 rounded-2xl border border-black/[0.08] overflow-x-auto no-scrollbar shadow-sm">
             {[
               { id: 'ask', label: 'Assistant', icon: <MessageSquare className="w-3.5 h-3.5" /> },
+              { id: 'grounding', label: 'Search & Maps Grounding', icon: <Globe className="w-3.5 h-3.5 text-blue-600" /> },
+              { id: 'live-voice', label: 'Live Voice (Live API)', icon: <Sparkles className="w-3.5 h-3.5 text-purple-600" /> },
+              { id: 'transcribe', label: 'Audio Transcribe', icon: <Radio className="w-3.5 h-3.5 text-emerald-600" /> },
               { id: 'summarize', label: 'Summarizer', icon: <Layers className="w-3.5 h-3.5" /> },
               { id: 'translate', label: 'Translator', icon: <Languages className="w-3.5 h-3.5" /> },
               { id: 'compose', label: 'Composer', icon: <FileText className="w-3.5 h-3.5" /> },
@@ -464,7 +483,201 @@ export const AIWorkspaceView: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* 5. GOOGLE SEARCH & MAPS GROUNDING TAB */}
+        {activeTool === 'grounding' && (
+          <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-black/[0.08] p-6 space-y-6 shadow-[0_16px_40px_rgba(0,0,0,0.06)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-black/[0.06]">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-black text-neutral-900">Google Grounding Studio</h3>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                    gemini-3.5-flash
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  Live factual grounding powered by Google Search & Google Maps with verifiable citation links
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setGroundingTab('search');
+                    setIsGroundingOpen(true);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-transform active:scale-95"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Open Search Grounding</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setGroundingTab('maps');
+                    setIsGroundingOpen(true);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-transform active:scale-95"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>Open Maps Grounding</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                onClick={() => {
+                  setGroundingTab('search');
+                  setIsGroundingOpen(true);
+                }}
+                className="p-5 rounded-2xl bg-blue-50/40 border border-blue-100 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all space-y-3 group"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-neutral-900 group-hover:text-blue-700 transition-colors">
+                    Google Search Grounding
+                  </h4>
+                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                    Retrieve real-time market news, sports scores, scientific papers, and current events. Automatically provides verified citations and search queries with gemini-3.5-flash.
+                  </p>
+                </div>
+                <div className="text-xs font-semibold text-blue-600 flex items-center gap-1">
+                  <span>Launch Search Tool</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+
+              <div
+                onClick={() => {
+                  setGroundingTab('maps');
+                  setIsGroundingOpen(true);
+                }}
+                className="p-5 rounded-2xl bg-emerald-50/40 border border-emerald-100 hover:border-emerald-300 hover:shadow-md cursor-pointer transition-all space-y-3 group"
+              >
+                <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-neutral-900 group-hover:text-emerald-700 transition-colors">
+                    Google Maps Grounding
+                  </h4>
+                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                    Discover local places, restaurants, ratings, and verified review snippets. Extracts interactive Google Maps URLs and review sources per location.
+                  </p>
+                </div>
+                <div className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+                  <span>Launch Maps Tool</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 6. GEMINI LIVE VOICE TAB */}
+        {activeTool === 'live-voice' && (
+          <div className="rounded-3xl bg-neutral-900 text-white border border-neutral-800 p-6 sm:p-8 space-y-6 shadow-2xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-800">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-black text-white">Gemini Live Voice Conversations</h3>
+                  <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    gemini-3.1-flash-live-preview
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-400">
+                  Real-time, bidirectional voice streaming using WebSocket audio downsampled to 16kHz PCM Little Endian and 24kHz audio playback
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsLiveVoiceOpen(true)}
+                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-500/30 transition-transform active:scale-95"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Start Live Voice Call</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div className="p-4 rounded-2xl bg-neutral-800/60 border border-neutral-700/60 space-y-1.5">
+                <span className="text-purple-400 font-bold block">Bidirectional Audio</span>
+                <p className="text-neutral-400 text-[11px] leading-relaxed">
+                  Streams your voice in real time with continuous turn detection and instant model response.
+                </p>
+              </div>
+              <div className="p-4 rounded-2xl bg-neutral-800/60 border border-neutral-700/60 space-y-1.5">
+                <span className="text-purple-400 font-bold block">Live Transcription</span>
+                <p className="text-neutral-400 text-[11px] leading-relaxed">
+                  Real-time subtitles for both user speech and AI responses with interruption handling.
+                </p>
+              </div>
+              <div className="p-4 rounded-2xl bg-neutral-800/60 border border-neutral-700/60 space-y-1.5">
+                <span className="text-purple-400 font-bold block">Multiple Voices</span>
+                <p className="text-neutral-400 text-[11px] leading-relaxed">
+                  Switch between Zephyr, Puck, Kore, Fenrir, and Charon voice personas.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 7. AUDIO TRANSCRIBE TAB */}
+        {activeTool === 'transcribe' && (
+          <div className="rounded-3xl bg-white/90 backdrop-blur-2xl border border-black/[0.08] p-6 sm:p-8 space-y-6 shadow-[0_16px_40px_rgba(0,0,0,0.06)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-black/[0.06]">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-black text-neutral-900">Audio Transcription Studio</h3>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    gemini-3.5-transcribe
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500">
+                  Transcribe voice recordings, audio clips, and dictation with verbatim accuracy
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsTranscribeOpen(true)}
+                className="px-6 py-3 rounded-2xl bg-black hover:bg-neutral-800 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-black/20 transition-transform active:scale-95"
+              >
+                <Mic className="w-4 h-4 text-emerald-400" />
+                <span>Open Audio Transcriber</span>
+              </button>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-neutral-50 border border-black/[0.06] space-y-3">
+              <h4 className="text-xs font-bold text-neutral-900 uppercase tracking-wider">Features</h4>
+              <ul className="text-xs text-neutral-600 space-y-2 list-disc list-inside leading-relaxed">
+                <li>Record live microphone audio with real-time audio waveform visualizer</li>
+                <li>Upload and transcribe pre-recorded audio files (.mp3, .wav, .webm, .ogg)</li>
+                <li>Verbatim speech-to-text accuracy powered by Google Gemini 3.5 Transcribe</li>
+                <li>Insert transcribed text directly into any conversation or copy to clipboard</li>
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Modals */}
+      <GoogleGroundingModal
+        isOpen={isGroundingOpen}
+        onClose={() => setIsGroundingOpen(false)}
+        initialTab={groundingTab}
+      />
+
+      <GeminiLiveVoiceModal
+        isOpen={isLiveVoiceOpen}
+        onClose={() => setIsLiveVoiceOpen(false)}
+      />
+
+      <AudioTranscribeModal
+        isOpen={isTranscribeOpen}
+        onClose={() => setIsTranscribeOpen(false)}
+      />
     </div>
   );
 };

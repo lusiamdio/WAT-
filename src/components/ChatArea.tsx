@@ -30,6 +30,10 @@ import {
   User as UserIcon,
   UploadCloud,
   FileUp,
+  Sparkles,
+  Globe,
+  Compass,
+  Radio,
 } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 import { MessageItem } from './MessageItem';
@@ -37,6 +41,9 @@ import { Message, ProductInfo } from '../types';
 import { soundEngine } from '../utils/audioSynth';
 import { EmojibasePicker } from './EmojibasePicker';
 import { extractActiveShortcode, searchEmojibase } from '../utils/emojibaseData';
+import { GoogleGroundingModal } from './ai/GoogleGroundingModal';
+import { AudioTranscribeModal } from './ai/AudioTranscribeModal';
+import { GeminiLiveVoiceModal } from './ai/GeminiLiveVoiceModal';
 
 export interface PreparedAttachment {
   id: string;
@@ -104,6 +111,12 @@ export const ChatArea: React.FC = () => {
 
   // Product share mini-modal
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+
+  // Google Grounding, Audio Transcribe, and Gemini Live Voice Modals
+  const [isGroundingModalOpen, setIsGroundingModalOpen] = useState(false);
+  const [groundingInitialTab, setGroundingInitialTab] = useState<'search' | 'maps'>('search');
+  const [isTranscribeModalOpen, setIsTranscribeModalOpen] = useState(false);
+  const [isLiveVoiceModalOpen, setIsLiveVoiceModalOpen] = useState(false);
 
   // Staged / Prepared attachments
   const [preparedAttachments, setPreparedAttachments] = useState<PreparedAttachment[]>([]);
@@ -553,7 +566,30 @@ export const ChatArea: React.FC = () => {
         </div>
 
         {/* Action Buttons: Voice Call, Video Call, Summary, Menu */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          {/* Google Search & Maps Grounding Button */}
+          <button
+            onClick={() => {
+              setGroundingInitialTab('search');
+              setIsGroundingModalOpen(true);
+            }}
+            className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-blue-50/80 hover:bg-blue-100/90 text-blue-700 border border-blue-200/80 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+            title="Google Search & Maps Grounding (gemini-3.5-flash)"
+          >
+            <Globe className="w-3.5 h-3.5 text-blue-600" />
+            <span className="hidden sm:inline">Grounding</span>
+          </button>
+
+          {/* Gemini Live Voice Conversation Button */}
+          <button
+            onClick={() => setIsLiveVoiceModalOpen(true)}
+            className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-purple-50/80 hover:bg-purple-100/90 text-purple-700 border border-purple-200/80 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+            title="Gemini Live Voice (gemini-3.1-flash-live-preview)"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+            <span className="hidden md:inline">Live Voice</span>
+          </button>
+
           {/* Summarize Button */}
           <button
             onClick={handleOpenSummarize}
@@ -1052,7 +1088,50 @@ export const ChatArea: React.FC = () => {
               <div className="w-9 h-9 rounded-2xl bg-black/[0.05] text-neutral-900 flex items-center justify-center">
                 <MapPin className="w-4 h-4" />
               </div>
-              <span className="text-[11px] font-medium">Location</span>
+              <span className="text-[11px] font-medium">GPS Location</span>
+            </button>
+
+            {/* Google Search & Maps Grounding */}
+            <button
+              onClick={() => {
+                setShowAttachmentMenu(false);
+                setGroundingInitialTab('search');
+                setIsGroundingModalOpen(true);
+              }}
+              className="flex flex-col items-center p-2.5 rounded-2xl hover:bg-blue-50 text-neutral-800 gap-1 transition-colors"
+            >
+              <div className="w-9 h-9 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <Globe className="w-4 h-4" />
+              </div>
+              <span className="text-[11px] font-medium">Grounding</span>
+            </button>
+
+            {/* Gemini Live Voice */}
+            <button
+              onClick={() => {
+                setShowAttachmentMenu(false);
+                setIsLiveVoiceModalOpen(true);
+              }}
+              className="flex flex-col items-center p-2.5 rounded-2xl hover:bg-purple-50 text-neutral-800 gap-1 transition-colors"
+            >
+              <div className="w-9 h-9 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <span className="text-[11px] font-medium">Live Voice</span>
+            </button>
+
+            {/* Speech-to-Text Transcribe */}
+            <button
+              onClick={() => {
+                setShowAttachmentMenu(false);
+                setIsTranscribeModalOpen(true);
+              }}
+              className="flex flex-col items-center p-2.5 rounded-2xl hover:bg-emerald-50 text-neutral-800 gap-1 transition-colors"
+            >
+              <div className="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Mic className="w-4 h-4" />
+              </div>
+              <span className="text-[11px] font-medium">Transcribe</span>
             </button>
 
             {/* Mobile Money Invoice */}
@@ -1230,14 +1309,28 @@ export const ChatArea: React.FC = () => {
                 )}
               </button>
             ) : (
-              <button
-                id="chat-mic-record-btn"
-                onClick={handleStartVoiceRecord}
-                className="p-2.5 rounded-2xl bg-black/[0.04] hover:bg-black/[0.08] text-neutral-700 hover:text-black transition-transform active:scale-95"
-                title="Hold to record voice note"
-              >
-                <Mic className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                {/* Speech-to-Text Transcribe (gemini-3.5-transcribe) */}
+                <button
+                  type="button"
+                  id="chat-speech-to-text-btn"
+                  onClick={() => setIsTranscribeModalOpen(true)}
+                  className="p-2.5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 transition-transform active:scale-95 border border-emerald-200/70"
+                  title="Speech-to-Text Audio Transcription (gemini-3.5-transcribe)"
+                >
+                  <Radio className="w-5 h-5" />
+                </button>
+
+                {/* Voice Note Record */}
+                <button
+                  id="chat-mic-record-btn"
+                  onClick={handleStartVoiceRecord}
+                  className="p-2.5 rounded-2xl bg-black/[0.04] hover:bg-black/[0.08] text-neutral-700 hover:text-black transition-transform active:scale-95"
+                  title="Hold to record voice note"
+                >
+                  <Mic className="w-5 h-5" />
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -1446,6 +1539,43 @@ export const ChatArea: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Google Search & Maps Grounding Modal (gemini-3.5-flash) */}
+      <GoogleGroundingModal
+        isOpen={isGroundingModalOpen}
+        onClose={() => setIsGroundingModalOpen(false)}
+        initialTab={groundingInitialTab}
+        onShareToChat={(content) => {
+          if (activeRoom) {
+            sendMessage(activeRoom.id, content);
+          }
+        }}
+      />
+
+      {/* Voice Audio Transcription Modal (gemini-3.5-transcribe) */}
+      <AudioTranscribeModal
+        isOpen={isTranscribeModalOpen}
+        onClose={() => setIsTranscribeModalOpen(false)}
+        onInsertTranscript={(text) => {
+          setInputText((prev) => (prev ? `${prev} ${text}` : text));
+        }}
+        onSendTranscript={(text) => {
+          if (activeRoom && text.trim()) {
+            sendMessage(activeRoom.id, text.trim());
+          }
+        }}
+      />
+
+      {/* Real-Time Live Voice Conversation Modal (gemini-3.1-flash-live-preview) */}
+      <GeminiLiveVoiceModal
+        isOpen={isLiveVoiceModalOpen}
+        onClose={() => setIsLiveVoiceModalOpen(false)}
+        onShareToChat={(summary) => {
+          if (activeRoom && summary.trim()) {
+            sendMessage(activeRoom.id, summary.trim());
+          }
+        }}
+      />
     </div>
   );
 };

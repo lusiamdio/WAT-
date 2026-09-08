@@ -315,7 +315,7 @@ export const AudioVoicePlayer: React.FC<AudioVoicePlayerProps> = ({
                 <span>Transcript {showTranscription ? '▼' : '▶'}</span>
               </button>
               <span className={`text-[9px] font-mono ${isOwn ? 'text-white/60' : 'text-neutral-400'}`}>
-                Whisper AI
+                gemini-3.5-transcribe
               </span>
             </div>
 

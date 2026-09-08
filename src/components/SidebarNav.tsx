@@ -10,6 +10,7 @@ import {
   UserCheck,
   ShieldCheck,
   Search,
+  Sparkles,
 } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 import { soundEngine } from '../utils/audioSynth';
@@ -150,6 +151,22 @@ export const SidebarNav: React.FC = () => {
           title="Profile"
         >
           <User className="w-5 h-5 md:w-6 md:h-6" />
+        </button>
+
+        {/* 5. AI Suite & Grounding Tab */}
+        <button
+          onClick={() => {
+            setActiveTab('ai');
+            soundEngine.playChime();
+          }}
+          className={`relative p-3 rounded-2xl transition-all duration-200 ${
+            activeTab === 'ai'
+              ? 'bg-black text-white shadow-lg shadow-black/20'
+              : 'text-neutral-500 hover:text-black hover:bg-black/[0.04]'
+          }`}
+          title="AI Intelligence, Grounding & Live Voice"
+        >
+          <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-purple-500" />
         </button>
 
         <div className="w-8 h-px bg-black/[0.08] my-1" />
