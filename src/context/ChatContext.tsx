@@ -96,6 +96,7 @@ interface ChatContextType {
     productInfo?: ProductInfo;
     contactInfo?: any;
     replyTo?: Message;
+    targetRoomId?: string;
   }) => void;
   toggleReaction: (messageId: string, emoji: string) => void;
   toggleStar: (messageId: string) => void;
@@ -146,6 +147,9 @@ interface ChatContextType {
   addStory: (story: Omit<StoryStatus, 'id' | 'viewsCount' | 'viewed' | 'timestamp'>) => void;
   markStoryViewed: (storyId: string) => void;
   deleteStory: (storyId: string) => void;
+  reactToStory: (storyId: string, emoji: string) => void;
+  reshareStory: (storyId: string, customCaption?: string) => void;
+  remixStory: (storyId: string, remixedData: { caption?: string; userNote?: string; overlayColor?: string; userReaction?: string; text?: string }) => void;
 
   // Business Suite & Mode
   products: ProductInfo[];
@@ -1280,22 +1284,27 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     productInfo?: ProductInfo;
     contactInfo?: any;
     replyTo?: Message;
+    targetRoomId?: string;
   }) => {
-    if (!activeRoom) return;
+    const targetRoom = params.targetRoomId
+      ? rooms.find((r) => r.id === params.targetRoomId) || activeRoom
+      : activeRoom;
+
+    if (!targetRoom) return;
 
     const isCurrentlyOffline = networkMode === 'offline' || !isOnline;
     const isSlow3G = networkMode === 'slow-3g';
 
     const expiresAt =
-      activeRoom.disappearingTimer > 0
-        ? Date.now() + activeRoom.disappearingTimer * 1000
+      targetRoom.disappearingTimer > 0
+        ? Date.now() + targetRoom.disappearingTimer * 1000
         : undefined;
 
     const initialStatus: MessageStatus = isCurrentlyOffline ? 'failed' : 'sending';
 
     const newMsg: Message = {
       id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-      roomId: activeRoom.id,
+      roomId: targetRoom.id,
       senderId: currentUser.id,
       senderName: currentUser.name,
       senderAvatar: currentUser.avatar,
@@ -1318,8 +1327,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           }
         : undefined,
       reactions: {},
-      isEncrypted: activeRoom.isEncrypted,
-      e2eeAlgorithm: activeRoom.isEncrypted ? 'm.megolm.v1.aes-sha2' : undefined,
+      isEncrypted: targetRoom.isEncrypted,
+      e2eeAlgorithm: targetRoom.isEncrypted ? 'm.megolm.v1.aes-sha2' : undefined,
       expiresAt,
     };
 
@@ -1329,20 +1338,20 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Log Matrix Synapse CS-API event
     const snippet = params.text ? `${params.text.slice(0, 35)}...` : params.type || 'media';
     logMatrixEvent(
-      activeRoom.isEncrypted ? 'm.room.encrypted' : 'm.room.message',
-      `/_matrix/client/v3/rooms/${activeRoom.id}/send/m.room.message/${newMsg.id}`,
+      targetRoom.isEncrypted ? 'm.room.encrypted' : 'm.room.message',
+      `/_matrix/client/v3/rooms/${targetRoom.id}/send/m.room.message/${newMsg.id}`,
       `Sent ${params.type || 'text'} event (${snippet}) [status: ${initialStatus}]`
     );
 
     setMessagesByRoom((prev) => ({
       ...prev,
-      [activeRoom.id]: [...(prev[activeRoom.id] || []), newMsg],
+      [targetRoom.id]: [...(prev[targetRoom.id] || []), newMsg],
     }));
 
     // Update room's last message
     setRooms((prev) =>
       prev.map((r) =>
-        r.id === activeRoom.id
+        r.id === targetRoom.id
           ? {
               ...r,
               lastMessage: newMsg,
@@ -1358,7 +1367,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         ...prev,
         {
           id: newMsg.id,
-          roomId: activeRoom.id,
+          roomId: targetRoom.id,
           params,
           timestamp: Date.now(),
           retryCount: 0,
@@ -1375,37 +1384,37 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     setTimeout(() => {
       setMessagesByRoom((prev) => {
-        const roomMsgs = prev[activeRoom.id] || [];
+        const roomMsgs = prev[targetRoom.id] || [];
         const updated = roomMsgs.map((m) =>
           m.id === newMsg.id ? { ...m, status: 'sent' as MessageStatus } : m
         );
-        return { ...prev, [activeRoom.id]: updated };
+        return { ...prev, [targetRoom.id]: updated };
       });
     }, sentDelay);
 
     setTimeout(() => {
       setMessagesByRoom((prev) => {
-        const roomMsgs = prev[activeRoom.id] || [];
+        const roomMsgs = prev[targetRoom.id] || [];
         const updated = roomMsgs.map((m) =>
           m.id === newMsg.id ? { ...m, status: 'delivered' as MessageStatus } : m
         );
-        return { ...prev, [activeRoom.id]: updated };
+        return { ...prev, [targetRoom.id]: updated };
       });
     }, deliveredDelay);
 
     // If direct chat or AI bot, simulate peer read receipt transition
-    if (activeRoom.type === 'direct' || activeRoom.id === 'room_ai_assistant') {
+    if (targetRoom.type === 'direct' || targetRoom.id === 'room_ai_assistant') {
       setTimeout(() => {
         setMessagesByRoom((prev) => {
-          const roomMsgs = prev[activeRoom.id] || [];
+          const roomMsgs = prev[targetRoom.id] || [];
           const updated = roomMsgs.map((m) =>
             m.id === newMsg.id ? { ...m, status: 'read' as MessageStatus } : m
           );
-          return { ...prev, [activeRoom.id]: updated };
+          return { ...prev, [targetRoom.id]: updated };
         });
         logMatrixEvent(
           'm.receipt',
-          `/_matrix/client/v3/rooms/${activeRoom.id}/receipt/m.read/${newMsg.id}`,
+          `/_matrix/client/v3/rooms/${targetRoom.id}/receipt/m.read/${newMsg.id}`,
           `Peer read receipt confirmed for message ${newMsg.id}`,
           'inbound'
         );
@@ -1413,13 +1422,13 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     // Trigger intelligent automated response if sending to WAT AI Copilot or Business account
-    if (activeRoom.id === 'room_ai_assistant' || activeRoom.memberIds.includes('user_ai')) {
-      handleAICopilotResponse(activeRoom.id, params.text);
-    } else if (activeRoom.businessInfo?.autoReplyEnabled && currentUser.id !== 'user_business') {
-      handleBusinessAutoReply(activeRoom);
-    } else if (activeRoom.type === 'direct') {
+    if (targetRoom.id === 'room_ai_assistant' || targetRoom.memberIds.includes('user_ai')) {
+      handleAICopilotResponse(targetRoom.id, params.text);
+    } else if (targetRoom.businessInfo?.autoReplyEnabled && currentUser.id !== 'user_business') {
+      handleBusinessAutoReply(targetRoom);
+    } else if (targetRoom.type === 'direct') {
       // Occasional realistic companion response simulation
-      handleSimulatedPeerReply(activeRoom, params.text);
+      handleSimulatedPeerReply(targetRoom, params.text);
     }
   };
 
@@ -2259,6 +2268,109 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setStories((prev) => prev.filter((s) => s.id !== storyId));
   };
 
+  const reactToStory = (storyId: string, emoji: string) => {
+    setStories((prev) =>
+      prev.map((s) => {
+        if (s.id !== storyId) return s;
+        const currentReactions = s.reactions || {};
+        const isCurrentSame = s.userReaction === emoji;
+        const newCount = (currentReactions[emoji] || 0) + (isCurrentSame ? 0 : 1);
+        return {
+          ...s,
+          userReaction: emoji,
+          reactions: {
+            ...currentReactions,
+            [emoji]: newCount,
+          },
+        };
+      })
+    );
+  };
+
+  const reshareStory = (storyId: string, customCaption?: string) => {
+    const originalStory = stories.find((s) => s.id === storyId);
+    if (!originalStory) return;
+
+    const newStory: StoryStatus = {
+      id: 'story_reshare_' + Date.now(),
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userAvatar: currentUser.avatar,
+      type: originalStory.type,
+      contentUrl: originalStory.contentUrl,
+      fileName: originalStory.fileName,
+      fileSize: originalStory.fileSize,
+      mimeType: originalStory.mimeType,
+      text: originalStory.text,
+      caption: customCaption
+        ? `${customCaption} 🔁 (Reshared from @${originalStory.userName})`
+        : `🔁 Reshared from @${originalStory.userName}${originalStory.caption ? `: ${originalStory.caption}` : ''}`,
+      bgColor: originalStory.bgColor,
+      timestamp: Date.now(),
+      viewed: false,
+      viewsCount: 1,
+      isPrivate: false,
+      isReshare: true,
+      resharedFrom: {
+        userId: originalStory.userId,
+        userName: originalStory.userName,
+        userAvatar: originalStory.userAvatar,
+        originalStoryId: originalStory.id,
+        originalCaption: originalStory.caption || originalStory.text,
+      },
+      reactions: {},
+    };
+    setStories((prev) => [newStory, ...prev]);
+  };
+
+  const remixStory = (
+    storyId: string,
+    remixedData: {
+      caption?: string;
+      userNote?: string;
+      overlayColor?: string;
+      userReaction?: string;
+      text?: string;
+    }
+  ) => {
+    const originalStory = stories.find((s) => s.id === storyId);
+    if (!originalStory) return;
+
+    const newStory: StoryStatus = {
+      id: 'story_remix_' + Date.now(),
+      userId: currentUser.id,
+      userName: currentUser.name,
+      userAvatar: currentUser.avatar,
+      type: originalStory.type,
+      contentUrl: originalStory.contentUrl,
+      fileName: originalStory.fileName,
+      fileSize: originalStory.fileSize,
+      mimeType: originalStory.mimeType,
+      text: remixedData.text || originalStory.text,
+      caption:
+        remixedData.caption ||
+        `✨ Remixed from @${originalStory.userName}${remixedData.userNote ? ` • "${remixedData.userNote}"` : ''}`,
+      bgColor: remixedData.overlayColor || originalStory.bgColor,
+      timestamp: Date.now(),
+      viewed: false,
+      viewsCount: 1,
+      isPrivate: false,
+      isRemix: true,
+      remixedFrom: {
+        userId: originalStory.userId,
+        userName: originalStory.userName,
+        userAvatar: originalStory.userAvatar,
+        originalStoryId: originalStory.id,
+        originalCaption: originalStory.caption || originalStory.text,
+        originalContentUrl: originalStory.contentUrl,
+        originalType: originalStory.type,
+        originalText: originalStory.text,
+      },
+      reactions: {},
+    };
+    setStories((prev) => [newStory, ...prev]);
+  };
+
   // Business invoice creator in chat
   const createInvoiceInChat = (
     amount: number,
@@ -2448,6 +2560,9 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addStory,
         markStoryViewed,
         deleteStory,
+        reactToStory,
+        reshareStory,
+        remixStory,
         products,
         setProducts,
         addProduct,

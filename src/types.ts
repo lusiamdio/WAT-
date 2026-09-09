@@ -244,6 +244,27 @@ export interface StoryStatus {
   viewed: boolean;
   viewsCount: number;
   isPrivate?: boolean; // When true: Viewers can view/play/read, but cannot download or save to device storage
+  reactions?: Record<string, number>; // emoji -> count, e.g. { '❤️': 4, '🔥': 2 }
+  userReaction?: string; // current user's reaction
+  isReshare?: boolean;
+  resharedFrom?: {
+    userId: string;
+    userName: string;
+    userAvatar: string;
+    originalStoryId?: string;
+    originalCaption?: string;
+  };
+  isRemix?: boolean;
+  remixedFrom?: {
+    userId: string;
+    userName: string;
+    userAvatar: string;
+    originalStoryId?: string;
+    originalCaption?: string;
+    originalContentUrl?: string;
+    originalType?: StoryContentType;
+    originalText?: string;
+  };
 }
 
 export interface CommunitySpace {

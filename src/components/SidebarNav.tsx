@@ -104,6 +104,25 @@ export const SidebarNav: React.FC = () => {
           )}
         </button>
 
+        {/* Status / Stories Tab */}
+        <button
+          onClick={() => {
+            setActiveTab('stories');
+            soundEngine.playChime();
+          }}
+          className={`relative p-3 rounded-2xl transition-all duration-200 ${
+            activeTab === 'stories'
+              ? 'bg-black text-white shadow-lg shadow-black/20'
+              : 'text-neutral-500 hover:text-black hover:bg-black/[0.04]'
+          }`}
+          title="Status Stories"
+        >
+          <Radio className="w-5 h-5 md:w-6 md:h-6" />
+          {stories.some((s) => !s.viewed) && (
+            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
+          )}
+        </button>
+
         {/* 2. Discover Tab */}
         <button
           onClick={() => {

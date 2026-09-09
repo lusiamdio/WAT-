@@ -4,7 +4,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Send,
-  Plus,
   Download,
   Lock,
   Play,
@@ -17,6 +16,8 @@ import {
   AlertCircle,
   Eye,
   ShieldCheck,
+  Repeat,
+  Sparkles,
 } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 import { downloadStatusMedia, downloadTextStatus } from '../utils/statusDownloadHelper';
@@ -34,6 +35,11 @@ export const StatusViewerModal: React.FC = () => {
     deleteStory,
     setIsPublishStatusModalOpen,
     currentUser,
+    reactToStory,
+    reshareStory,
+    remixStory,
+    rooms,
+    createRoom,
   } = useChat();
 
   const [replyText, setReplyText] = useState('');
@@ -106,13 +112,80 @@ export const StatusViewerModal: React.FC = () => {
   };
 
   const handleSendReply = () => {
-    if (!replyText.trim()) return;
+    if (!replyText.trim() || !currentStory) return;
+
+    let targetRoom = rooms.find(
+      (r) => r.type === 'direct' && r.memberIds.includes(currentStory.userId)
+    );
+    if (!targetRoom) {
+      targetRoom = createRoom(currentStory.userName, 'direct', [currentStory.userId]);
+    }
+
+    const snippet = currentStory.caption || currentStory.fileName || currentStory.type;
     sendMessage({
-      text: `Replied to status: "${currentStory.caption || currentStory.fileName || currentStory.type}": ${replyText.trim()}`,
+      text: `Replied to your status "${snippet}":\n${replyText.trim()}`,
       type: 'text',
+      targetRoomId: targetRoom.id,
     });
     setReplyText('');
-    setIsStoryViewerOpen(false);
+    soundEngine.playMessageSent();
+    setDownloadToast({
+      message: `Direct reply sent to ${currentStory.userName}!`,
+      isError: false,
+    });
+    setTimeout(() => setDownloadToast(null), 2500);
+  };
+
+  const handleEmojiReaction = (emoji: string) => {
+    if (!currentStory) return;
+    soundEngine.playPop();
+    reactToStory(currentStory.id, emoji);
+
+    if (currentStory.userId !== currentUser.id) {
+      let targetRoom = rooms.find(
+        (r) => r.type === 'direct' && r.memberIds.includes(currentStory.userId)
+      );
+      if (!targetRoom) {
+        targetRoom = createRoom(currentStory.userName, 'direct', [currentStory.userId]);
+      }
+      const snippet = currentStory.caption || currentStory.fileName || currentStory.type;
+      sendMessage({
+        text: `${emoji} Reacted to your status: "${snippet}"`,
+        type: 'text',
+        targetRoomId: targetRoom.id,
+      });
+    }
+
+    setDownloadToast({
+      message: `Reacted with ${emoji} to ${currentStory.userName}!`,
+      isError: false,
+    });
+    setTimeout(() => setDownloadToast(null), 2000);
+  };
+
+  const handleReshare = () => {
+    if (!currentStory) return;
+    soundEngine.playChime();
+    reshareStory(currentStory.id);
+    setDownloadToast({
+      message: '🔁 Reshared to your status!',
+      isError: false,
+    });
+    setTimeout(() => setDownloadToast(null), 3000);
+  };
+
+  const handleRemix = () => {
+    if (!currentStory) return;
+    soundEngine.playChime();
+    remixStory(currentStory.id, {
+      caption: `✨ Remixed status from @${currentStory.userName}`,
+      userReaction: '🔥',
+    });
+    setDownloadToast({
+      message: '✨ Remixed and published to your status!',
+      isError: false,
+    });
+    setTimeout(() => setDownloadToast(null), 3000);
   };
 
   // Handle Save to Device Storage
@@ -238,6 +311,30 @@ export const StatusViewerModal: React.FC = () => {
 
             {/* Header Right Actions */}
             <div className="flex items-center gap-1.5">
+              {/* Remix Status */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemix();
+                }}
+                className="p-2 rounded-full bg-purple-600/50 hover:bg-purple-600 text-white transition-all hover:scale-105 active:scale-95 shadow-md"
+                title="Remix this status"
+              >
+                <Sparkles className="w-4 h-4 text-purple-200" />
+              </button>
+
+              {/* Reshare Status */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleReshare();
+                }}
+                className="p-2 rounded-full bg-white/20 hover:bg-white/40 text-white transition-all hover:scale-105 active:scale-95 shadow-md"
+                title="Reshare to your status"
+              >
+                <Repeat className="w-4 h-4" />
+              </button>
+
               {/* SAVE TO DEVICE BUTTON */}
               <button
                 onClick={(e) => {
@@ -271,20 +368,6 @@ export const StatusViewerModal: React.FC = () => {
                   <Trash2 className="w-4 h-4" />
                 </button>
               )}
-
-              {/* Add New Status Button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsStoryViewerOpen(false);
-                  setIsPublishStatusModalOpen(true);
-                }}
-                className="px-2.5 py-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-neutral-950 text-xs font-bold flex items-center gap-1 shadow-md"
-                title="Post new status"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add</span>
-              </button>
 
               {/* Close Button */}
               <button
@@ -524,6 +607,24 @@ export const StatusViewerModal: React.FC = () => {
               {currentStory.caption}
             </p>
           )}
+
+          {/* Quick One-Click Emoji Reactions */}
+          <div className="flex items-center justify-center gap-2 py-1">
+            {['❤️', '🔥', '😂', '😮', '😢', '👏', '🎉', '💯'].map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEmojiReaction(emoji);
+                }}
+                className="p-1.5 rounded-full hover:bg-white/20 hover:scale-125 active:scale-95 transition-all text-xl"
+                title={`React with ${emoji}`}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
 
           {/* Reply input */}
           <div className="flex items-center gap-2">

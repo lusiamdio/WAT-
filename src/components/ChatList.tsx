@@ -232,17 +232,6 @@ export const ChatList: React.FC = () => {
                   alt={currentUser.name}
                   className="w-12 h-12 rounded-2xl object-cover p-0.5 ring-2 ring-black/10 group-hover:ring-black transition-all"
                 />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsPublishStatusModalOpen(true);
-                  }}
-                  className="absolute -bottom-0.5 -right-0.5 w-4.5 h-4.5 bg-black text-white rounded-full flex items-center justify-center font-bold text-xs ring-2 ring-white hover:scale-110 active:scale-95 transition-transform"
-                  title="Add new status update"
-                >
-                  +
-                </button>
               </div>
               <span className="text-[11px] text-neutral-500 group-hover:text-black truncate w-14 text-center font-medium">
                 Your status

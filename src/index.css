@@ -344,3 +344,22 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.24);
 }
+
+@keyframes statusFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.8);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-80px) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-160px) scale(1.4);
+  }
+}
+
+.animate-status-float {
+  animation: statusFloat 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}

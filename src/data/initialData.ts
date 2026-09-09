@@ -753,6 +753,7 @@ export const INITIAL_STORIES: StoryStatus[] = [
     viewed: false,
     viewsCount: 142,
     isPrivate: false, // Downloadable to device storage
+    reactions: { '❤️': 8, '🔥': 5, '👏': 3 },
   },
   {
     id: 'story_video_1',
@@ -768,6 +769,7 @@ export const INITIAL_STORIES: StoryStatus[] = [
     viewed: false,
     viewsCount: 98,
     isPrivate: false, // Downloadable to device storage
+    reactions: { '🔥': 12, '😮': 4, '💯': 7 },
   },
   {
     id: 'story_pdf_1',

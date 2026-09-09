@@ -43,6 +43,7 @@ import {
   Compass,
   Store,
   User,
+  Radio,
 } from 'lucide-react';
 import { soundEngine } from './utils/audioSynth';
 
@@ -248,6 +249,27 @@ const MainAuthenticatedLayout: React.FC = () => {
               )}
             </div>
             {activeTab === 'chats' && <span className="text-xs font-semibold">Chats</span>}
+          </button>
+
+          {/* Status Stories */}
+          <button
+            onClick={() => {
+              setActiveTab('stories');
+              soundEngine.playChime();
+            }}
+            className={`flex items-center gap-1.5 py-1.5 px-3 rounded-full transition-all duration-200 ${
+              activeTab === 'stories'
+                ? 'bg-black text-white shadow-md'
+                : 'text-neutral-500 hover:text-black'
+            }`}
+          >
+            <div className="relative">
+              <Radio className="w-4 h-4" />
+              {stories.some((s) => !s.viewed) && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full ring-1 ring-white" />
+              )}
+            </div>
+            {activeTab === 'stories' && <span className="text-xs font-semibold">Status</span>}
           </button>
 
           {/* 2. Discover */}
