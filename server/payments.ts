@@ -160,6 +160,40 @@ const transactionsStore: any[] = [];
 const emailNotificationsStore: EmailNotification[] = [];
 const processedIdempotencyKeys = new Set<string>();
 
+function toFiniteNonNegativeNumber(value: unknown): number | null {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) && numberValue >= 0 ? numberValue : null;
+}
+
+function isValidCardNumber(cardNumber: string): boolean {
+  if (!/^\d{13,19}$/.test(cardNumber)) return false;
+
+  let sum = 0;
+  let shouldDouble = false;
+  for (let index = cardNumber.length - 1; index >= 0; index--) {
+    let digit = Number(cardNumber[index]);
+    if (shouldDouble) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+    shouldDouble = !shouldDouble;
+  }
+  return sum % 10 === 0;
+}
+
+function isValidCheckoutItem(item: any): boolean {
+  return (
+    item &&
+    typeof item.name === 'string' &&
+    item.name.trim().length > 0 &&
+    Number.isFinite(Number(item.price)) &&
+    Number(item.price) >= 0 &&
+    Number.isInteger(Number(item.quantity)) &&
+    Number(item.quantity) > 0
+  );
+}
+
 // Checkout Sessions Store (tracks pending sessions for abandoned checkout job)
 const checkoutSessionsStore: CheckoutSession[] = [
   {
@@ -796,9 +830,27 @@ export function createPaymentRouter(): Router {
         });
       }
 
-      const cleanNumber = String(cardNumber).replace(/\s+/g, '');
-      if (cleanNumber.length < 13 || cleanNumber.length > 19) {
-        return res.status(400).json({ error: 'Invalid card number format' });
+      const cleanNumber = String(cardNumber).replace(/[\s-]+/g, '');
+      if (!isValidCardNumber(cleanNumber)) {
+        return res.status(400).json({ error: 'Invalid card number' });
+      }
+
+      const month = Number(expMonth);
+      const year = Number(expYear);
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      if (
+        !Number.isInteger(month) ||
+        month < 1 ||
+        month > 12 ||
+        !Number.isInteger(year) ||
+        year < currentYear ||
+        (year === currentYear && month < now.getMonth() + 1)
+      ) {
+        return res.status(400).json({ error: 'Invalid or expired card expiry date' });
+      }
+      if (!/^\d{3,4}$/.test(String(cvv))) {
+        return res.status(400).json({ error: 'Invalid card security code' });
       }
 
       // Detect card brand
@@ -824,8 +876,8 @@ export function createPaymentRouter(): Router {
         type: 'card',
         brand,
         last4,
-        expMonth: Number(expMonth),
-        expYear: Number(expYear),
+        expMonth: month,
+        expYear: year,
         cardholderName: cardholderName.trim(),
         isDefault: isDefault || savedPaymentMethods.filter((m) => m.userId === userId).length === 0,
         createdAt: Date.now(),
@@ -889,6 +941,11 @@ export function createPaymentRouter(): Router {
         return res.status(400).json({ error: 'Voucher code is required' });
       }
 
+      const numericSubtotal = toFiniteNonNegativeNumber(subtotal);
+      if (numericSubtotal === null) {
+        return res.status(400).json({ error: 'Subtotal must be a non-negative number' });
+      }
+
       const upper = String(code).trim().toUpperCase();
       const voucher = availableVouchers[upper];
 
@@ -899,18 +956,18 @@ export function createPaymentRouter(): Router {
         });
       }
 
-      if (voucher.minSpend && subtotal < voucher.minSpend) {
+      if (voucher.minSpend && numericSubtotal < voucher.minSpend) {
         return res.status(400).json({
           valid: false,
-          error: `Voucher requires a minimum purchase of R${voucher.minSpend} / $${voucher.minSpend}. Current subtotal: R${subtotal}`,
+          error: `Voucher requires a minimum purchase of R${voucher.minSpend} / $${voucher.minSpend}. Current subtotal: R${numericSubtotal}`,
         });
       }
 
       let discountAmount = 0;
       if (voucher.discountType === 'percentage') {
-        discountAmount = Math.round((subtotal * voucher.discountValue) / 100 * 100) / 100;
+        discountAmount = Math.round((numericSubtotal * voucher.discountValue) / 100 * 100) / 100;
       } else {
-        discountAmount = Math.min(subtotal, voucher.discountValue);
+        discountAmount = Math.min(numericSubtotal, voucher.discountValue);
       }
 
       res.json({
@@ -935,8 +992,11 @@ export function createPaymentRouter(): Router {
         currency = 'ZAR',
       } = req.body;
 
-      if (!items || items.length === 0) {
+      if (!Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ error: 'At least one product item is required' });
+      }
+      if (!items.every(isValidCheckoutItem)) {
+        return res.status(400).json({ error: 'Each item must include a name, non-negative price, and positive whole quantity' });
       }
 
       // Server-side calculation
@@ -1027,6 +1087,21 @@ export function createPaymentRouter(): Router {
         return res.status(400).json({ error: 'Payment method is required' });
       }
 
+      const paymentTotal = toFiniteNonNegativeNumber(total);
+      if (paymentTotal === null || paymentTotal <= 0) {
+        return res.status(400).json({ error: 'A valid payment total is required' });
+      }
+      const paymentSubtotal = toFiniteNonNegativeNumber(subtotal);
+      const paymentDiscount = toFiniteNonNegativeNumber(discount);
+      const paymentTax = toFiniteNonNegativeNumber(tax);
+      const paymentShipping = toFiniteNonNegativeNumber(shipping);
+      if ([paymentSubtotal, paymentDiscount, paymentTax, paymentShipping].some((value) => value === null)) {
+        return res.status(400).json({ error: 'Payment amounts must be non-negative numbers' });
+      }
+      if (!Array.isArray(items) || items.length === 0 || !items.every(isValidCheckoutItem)) {
+        return res.status(400).json({ error: 'At least one valid checkout item is required' });
+      }
+
       // Idempotency check
       if (idempotencyKey && processedIdempotencyKeys.has(idempotencyKey)) {
         return res.status(409).json({
@@ -1070,7 +1145,7 @@ export function createPaymentRouter(): Router {
         const failedTxn = {
           transactionId,
           orderId,
-          amount: total,
+          amount: paymentTotal,
           currency,
           paymentMethod,
           paymentMethodDetails,
@@ -1085,7 +1160,7 @@ export function createPaymentRouter(): Router {
         const declinedHtml = generateDeclinedEmailHtml({
           customerName: customerInfo.name,
           orderId,
-          attemptedAmount: total,
+          attemptedAmount: paymentTotal,
           currency,
           paymentMethod: getPaymentMethodLabel(paymentMethod, paymentMethodDetails),
           reason: failureReason,
@@ -1095,10 +1170,10 @@ export function createPaymentRouter(): Router {
         const declinedEmailNotification: EmailNotification = {
           id: `email_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
           to: customerInfo.email,
-          subject: `⚠️ Payment Unsuccessful - Order #${orderId} (${currency} ${total})`,
+          subject: `⚠️ Payment Unsuccessful - Order #${orderId} (${currency} ${paymentTotal})`,
           type: 'payment_declined',
           orderId,
-          amount: total,
+          amount: paymentTotal,
           currency,
           timestamp: now,
           html: declinedHtml,
@@ -1127,11 +1202,11 @@ export function createPaymentRouter(): Router {
         transactionId,
         items: items || [],
         customer: customerInfo,
-        subtotal: subtotal || total,
-        discount: discount || 0,
-        tax: tax || 0,
-        shipping: shipping || 0,
-        total,
+        subtotal: paymentSubtotal,
+        discount: paymentDiscount,
+        tax: paymentTax,
+        shipping: paymentShipping,
+        total: paymentTotal,
         currency,
         paymentStatus: 'payment_successful',
         paymentMethod,
@@ -1146,7 +1221,7 @@ export function createPaymentRouter(): Router {
       const successTxn = {
         transactionId,
         orderId,
-        amount: total,
+        amount: paymentTotal,
         currency,
         paymentMethod,
         paymentMethodDetails,
@@ -1163,11 +1238,11 @@ export function createPaymentRouter(): Router {
         orderId,
         transactionId,
         items: items || [],
-        subtotal: subtotal || total,
-        discount: discount || 0,
-        tax: tax || 0,
-        shipping: shipping || 0,
-        total,
+        subtotal: paymentSubtotal,
+        discount: paymentDiscount,
+        tax: paymentTax,
+        shipping: paymentShipping,
+        total: paymentTotal,
         currency,
         paymentMethod: getPaymentMethodLabel(paymentMethod, paymentMethodDetails),
         sellerName,
@@ -1177,10 +1252,10 @@ export function createPaymentRouter(): Router {
       const successEmailNotification: EmailNotification = {
         id: `email_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         to: customerInfo.email,
-        subject: `✓ Payment Receipt & Order Confirmed - #${orderId} (${currency} ${total})`,
+        subject: `✓ Payment Receipt & Order Confirmed - #${orderId} (${currency} ${paymentTotal})`,
         type: 'payment_success',
         orderId,
-        amount: total,
+        amount: paymentTotal,
         currency,
         timestamp: now,
         html: successHtml,
@@ -1257,6 +1332,14 @@ export function createPaymentRouter(): Router {
         status = 'pending',
       } = req.body;
 
+      if (!Array.isArray(items) || items.length === 0 || !items.every(isValidCheckoutItem)) {
+        return res.status(400).json({ error: 'At least one checkout item with a name, non-negative price, and positive whole quantity is required' });
+      }
+      const amounts = [subtotal, discount, tax, shipping, total].map(toFiniteNonNegativeNumber);
+      if (amounts.some((value) => value === null)) {
+        return res.status(400).json({ error: 'Checkout amounts must be non-negative numbers' });
+      }
+
       const existingIndex = checkoutSessionsStore.findIndex((s) => s.sessionId === sessionId);
       const sessionData: CheckoutSession = {
         sessionId,
@@ -1269,12 +1352,12 @@ export function createPaymentRouter(): Router {
           city: 'Johannesburg',
           country: 'South Africa',
         },
-        items: items || [],
-        subtotal: Number(subtotal) || 0,
-        discount: Number(discount) || 0,
-        tax: Number(tax) || 0,
-        shipping: Number(shipping) || 0,
-        total: Number(total) || 0,
+        items,
+        subtotal: amounts[0]!,
+        discount: amounts[1]!,
+        tax: amounts[2]!,
+        shipping: amounts[3]!,
+        total: amounts[4]!,
         currency,
         currentStep,
         status,

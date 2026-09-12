@@ -105,7 +105,8 @@ ${messageSnippets.length > 0 ? messageSnippets.join('\n') : '• Regular sync an
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const configuredPort = Number.parseInt(process.env.PORT || '3000', 10);
+  const PORT = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
 
   app.use(express.json({ limit: '10mb' }));
 
@@ -165,16 +166,27 @@ async function startServer() {
       WAT: 12.5,
     };
 
-    const fromRate = rates[from] || 1;
-    const toRate = rates[to] || 1;
-    const usdVal = amount / fromRate;
+    const fromCurrency = String(from).toUpperCase();
+    const toCurrency = String(to).toUpperCase();
+    const numericAmount = Number(amount);
+
+    if (!Number.isFinite(numericAmount) || numericAmount < 0) {
+      return res.status(400).json({ error: 'Amount must be a non-negative number' });
+    }
+    if (!rates[fromCurrency] || !rates[toCurrency]) {
+      return res.status(400).json({ error: 'Unsupported currency code' });
+    }
+
+    const fromRate = rates[fromCurrency];
+    const toRate = rates[toCurrency];
+    const usdVal = numericAmount / fromRate;
     const converted = usdVal * toRate;
     const exchangeRate = toRate / fromRate;
 
     res.json({
-      from,
-      to,
-      amount,
+      from: fromCurrency,
+      to: toCurrency,
+      amount: numericAmount,
       convertedAmount: +converted.toFixed(2),
       exchangeRate: +exchangeRate.toFixed(4),
       fee: 0,
@@ -769,7 +781,10 @@ Keep it concise and crystal clear.`,
       wss.handleUpgrade(request, socket, head, (ws) => {
         wss.emit('connection', ws, request);
       });
+      return;
     }
+
+    socket.destroy();
   });
 
   wss.on('connection', async (clientWs: WebSocket, request) => {
