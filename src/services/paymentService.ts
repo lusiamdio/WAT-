@@ -248,7 +248,7 @@ export const paymentService = {
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (res.status === 402 || !data.success) {
+      if (res.status === 402) {
         return {
           success: false,
           status: 'payment_declined',
@@ -256,6 +256,13 @@ export const paymentService = {
           orderId: data.orderId,
           transactionId: data.transactionId,
           emailNotification: data.emailNotification,
+        };
+      }
+      if (!res.ok || !data.success) {
+        return {
+          success: false,
+          status: 'payment_failed',
+          error: data.error || 'Payment processing failed. Please try again.',
         };
       }
       return {

@@ -187,6 +187,13 @@ export const WATCheckoutModal: React.FC<Props> = ({
         alert('Please fill out all required card fields (Number, Expiry, CVV)');
         return;
       }
+      const [month, year] = newCardExp.split('/').map(Number);
+      const expiryYear = year ? 2000 + year : 0;
+      const isExpired = !month || month > 12 || !year || new Date(expiryYear, month).getTime() <= Date.now();
+      if (isExpired || !/^\d{3,4}$/.test(newCardCvv)) {
+        alert('Please enter a valid, unexpired card expiry date and security code');
+        return;
+      }
     }
     soundEngine.playChime();
     setCurrentStep('review');
@@ -218,7 +225,7 @@ export const WATCheckoutModal: React.FC<Props> = ({
 
   // Format Card Number
   const handleCardNumberInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/\D/g, '').slice(0, 16);
+    const val = e.target.value.replace(/\D/g, '').slice(0, 19);
     const formatted = val.match(/.{1,4}/g)?.join(' ') || val;
     setNewCardNumber(formatted);
   };
@@ -285,7 +292,7 @@ export const WATCheckoutModal: React.FC<Props> = ({
 
         if (saveCardForFuture) {
           setProcessingStep('Saving tokenized card to your WAT vault...');
-          await paymentService.addCard({
+          const savedCard = await paymentService.addCard({
             cardNumber: newCardNumber,
             expMonth,
             expYear,
@@ -293,6 +300,11 @@ export const WATCheckoutModal: React.FC<Props> = ({
             cardholderName: newCardHolder,
             isDefault: savedCards.length === 0,
           });
+          if (!savedCard.success) {
+            setIsProcessing(false);
+            alert(savedCard.error || 'Your card could not be saved. Please verify its details and try again.');
+            return;
+          }
         }
 
         paymentMethodDetails = {
