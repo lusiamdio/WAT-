@@ -74,6 +74,7 @@ export interface CheckoutSession {
   createdAt: number;
   lastActivityAt: number;
   userId: string;
+
   abandonedEmailSent?: boolean;
   abandonedEmailSentAt?: number;
   recoveryUrl?: string;
@@ -1081,6 +1082,7 @@ export function createPaymentRouter(): Router {
         sessionId,
         userId: req.auth!.userId,
         orderId: `WAT-ORD-${Math.floor(100000 + Math.random() * 900000)}`,
+
         customer: session.customer,
         items, subtotal, discount, tax, shipping, total, currency,
         status: 'pending',
@@ -1125,6 +1127,7 @@ export function createPaymentRouter(): Router {
         return res.status(400).json({ error: 'A pending checkout session owned by the current user is required' });
       }
 
+
       const paymentTotal = toFiniteNonNegativeNumber(total);
       if (paymentTotal === null || paymentTotal <= 0) {
         return res.status(400).json({ error: 'A valid payment total is required' });
@@ -1163,18 +1166,12 @@ export function createPaymentRouter(): Router {
         timeStyle: 'short',
       });
 
-      const customerInfo = customer || {
-        name: 'Lusimadio Nkem',
-        email: 'lusimadio12@gmail.com',
-        phone: '+27 78 492 0184',
-        shippingAddress: '42 Decentralized Ave',
-        city: 'Johannesburg',
-        country: 'South Africa',
-      };
+      // Fulfilment and receipts must use the server-created checkout record, never a request override.
+      const customerInfo = checkoutSession.customer;
 
-      // Check simulated decline triggers
+      // Simulation flags are development-only; production decisions come from the payment provider.
       const isDecline =
-        simulateDecline ||
+        (process.env.NODE_ENV !== 'production' && simulateDecline) ||
         paymentMethodDetails?.last4 === '0002' ||
         paymentMethodDetails?.last4 === '0003';
 
