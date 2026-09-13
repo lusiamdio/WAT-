@@ -87,11 +87,14 @@ export const WATEmailNotificationViewerModal: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Email Body Content (Rendered HTML) */}
+          {/* Email content is isolated from the application origin. */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#f8fafc]">
-            <div
-              className="w-full bg-white rounded-2xl shadow-xs border border-black/[0.06] overflow-hidden"
-              dangerouslySetInnerHTML={{ __html: email.html }}
+            <iframe
+              title="Transaction email preview"
+              sandbox=""
+              referrerPolicy="no-referrer"
+              srcDoc={email.html}
+              className="w-full min-h-[28rem] bg-white rounded-2xl shadow-xs border border-black/[0.06]"
             />
           </div>
 

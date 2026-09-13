@@ -46,37 +46,9 @@ export const paymentService = {
         return data.paymentMethods || [];
       }
     } catch (e) {
-      console.warn('Backend payment method fetch fallback:', e);
+      console.warn('Unable to retrieve payment methods:', e);
     }
-    // Fallback default stored methods
-    return [
-      {
-        id: 'pm_card_4821',
-        userId,
-        type: 'card',
-        brand: 'visa',
-        last4: '4821',
-        expMonth: 12,
-        expYear: 2028,
-        cardholderName: 'Lusimadio Nkem',
-        isDefault: true,
-        createdAt: Date.now() - 86400000 * 14,
-        token: 'tok_visa_4821_secure_pci',
-      },
-      {
-        id: 'pm_card_9012',
-        userId,
-        type: 'card',
-        brand: 'mastercard',
-        last4: '9012',
-        expMonth: 8,
-        expYear: 2029,
-        cardholderName: 'Lusimadio Nkem',
-        isDefault: false,
-        createdAt: Date.now() - 86400000 * 5,
-        token: 'tok_mc_9012_secure_pci',
-      },
-    ];
+    return [];
   },
 
   // 2. Add a new bank card
@@ -111,7 +83,7 @@ export const paymentService = {
       const res = await fetch(`/api/payment-methods/${id}`, { method: 'DELETE' });
       return res.ok;
     } catch {
-      return true;
+      return false;
     }
   },
 
@@ -121,7 +93,7 @@ export const paymentService = {
       const res = await fetch(`/api/payment-methods/${id}/default`, { method: 'POST' });
       return res.ok;
     } catch {
-      return true;
+      return false;
     }
   },
 
@@ -147,36 +119,7 @@ export const paymentService = {
         message: data.message,
       };
     } catch (e: any) {
-      // Local fallback voucher engine if offline
-      const upper = code.trim().toUpperCase();
-      if (upper === 'WAT10') {
-        const discountAmount = Math.round(subtotal * 0.1 * 100) / 100;
-        return {
-          valid: true,
-          voucher: { code: 'WAT10', discountType: 'percentage', discountValue: 10, description: '10% off', isActive: true },
-          discountAmount,
-          message: 'Applied 10% WAT Community discount!',
-        };
-      } else if (upper === 'AFRICA20') {
-        if (subtotal < 200) {
-          return { valid: false, error: 'AFRICA20 requires min spend of R200 / $15' };
-        }
-        const discountAmount = Math.round(subtotal * 0.2 * 100) / 100;
-        return {
-          valid: true,
-          voucher: { code: 'AFRICA20', discountType: 'percentage', discountValue: 20, description: '20% off', isActive: true },
-          discountAmount,
-          message: 'Applied 20% Pan-African discount!',
-        };
-      } else if (upper === 'LAUNCH50') {
-        return {
-          valid: true,
-          voucher: { code: 'LAUNCH50', discountType: 'fixed', discountValue: 50, description: 'R50 Flat Discount', isActive: true },
-          discountAmount: 50,
-          message: 'Applied R50 / $50 Launch Discount!',
-        };
-      }
-      return { valid: false, error: `Voucher code "${code}" is invalid or expired` };
+      return { valid: false, error: e?.message || 'Voucher validation is temporarily unavailable' };
     }
   },
 
@@ -199,35 +142,9 @@ export const paymentService = {
         return data.session;
       }
     } catch (e) {
-      console.warn('Create checkout session fallback:', e);
+      console.warn('Unable to create checkout session:', e);
     }
-
-    // Heuristic calculation fallback
-    const subtotal = params.items.reduce((acc, it) => acc + it.price * it.quantity, 0);
-    const tax = Math.round(subtotal * 0.15 * 100) / 100;
-    const shipping = subtotal > 500 ? 0 : 45;
-    return {
-      sessionId: `cs_${Date.now()}`,
-      items: params.items,
-      subtotal,
-      discount: 0,
-      tax,
-      shipping,
-      total: subtotal + tax + shipping,
-      currency: params.currency || 'ZAR',
-      status: 'checkout_created',
-      customer: params.customer || {
-        name: 'Lusimadio Nkem',
-        email: 'lusimadio12@gmail.com',
-        phone: '+27 78 492 0184',
-        shippingAddress: '42 Decentralized Avenue, Sandton',
-        city: 'Johannesburg',
-        country: 'South Africa',
-      },
-      originatingContext: params.originatingContext,
-      idempotencyKey: `idemp_${Date.now()}`,
-      createdAt: Date.now(),
-    };
+    throw new Error('Checkout is unavailable. Please try again later.');
   },
 
   // 7. Process & Settle Payment (Triggers server authorization and automated email)

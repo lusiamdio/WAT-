@@ -44,10 +44,10 @@ export const AuthAndOnboardingFlow: React.FC = () => {
     isBusiness?: boolean;
     bio?: string;
   }>({
-    name: currentUser?.name || 'Kwame Mensah',
-    handle: currentUser?.handle || '@kwamemensah:wat.chat',
-    avatar: currentUser?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-    bio: currentUser?.bio || 'Product Architect & Explorer',
+    name: currentUser?.name || '',
+    handle: currentUser?.handle || '',
+    avatar: currentUser?.avatar || '/wat-logo.png',
+    bio: currentUser?.bio || '',
     isBusiness: currentUser?.isBusinessAccount || false,
   });
 
@@ -55,34 +55,22 @@ export const AuthAndOnboardingFlow: React.FC = () => {
 
   // Handle successful Sign In
   const handleSignInSuccess = async (identifier: string, isBusiness: boolean = false) => {
-    const matched = users.find(
-      (u) =>
-        u.email?.toLowerCase() === identifier.toLowerCase() ||
-        u.handle?.toLowerCase() === identifier.toLowerCase() ||
-        u.phone?.includes(identifier)
-    );
+    const result = await signIn(identifier);
+    if (!result.success || !result.user) {
+      return;
+    }
 
-    if (matched) {
-      setCurrentUserById(matched.id);
-      setTempProfile({
-        name: matched.name,
-        handle: matched.handle,
-        avatar: matched.avatar,
-        isBusiness: matched.isBusinessAccount,
-        bio: matched.bio,
-      });
-    } else {
-      const defaultUser = isBusiness ? users[1] || users[0] : users[0];
-      if (defaultUser) {
-        setCurrentUserById(defaultUser.id);
-        setTempProfile({
-          name: defaultUser.name,
-          handle: defaultUser.handle,
-          avatar: defaultUser.avatar,
-          isBusiness,
-          bio: defaultUser.bio,
-        });
-      }
+    const matched = result.user;
+    setCurrentUserById(matched.id);
+    setTempProfile({
+      name: matched.name,
+      handle: matched.handle,
+      avatar: matched.avatar,
+      isBusiness: matched.isBusinessAccount,
+      bio: matched.bio,
+    });
+    if (result.requiresMfa) {
+      return;
     }
 
     setStage('onboarding');

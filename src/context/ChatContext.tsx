@@ -526,16 +526,16 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Multi-Currency Holdings & Real-Time Exchange
   const INITIAL_WALLET_BALANCES: Record<string, number> = {
-    ZAR: 24850.0,
-    USD: 1360.5,
-    EUR: 1250.0,
-    GBP: 980.0,
-    NGN: 850000.0,
-    KES: 95000.0,
-    GHS: 6400.0,
-    EGP: 28500.0,
-    XOF: 450000.0,
-    WAT: 12500.0,
+    ZAR: 0,
+    USD: 0,
+    EUR: 0,
+    GBP: 0,
+    NGN: 0,
+    KES: 0,
+    GHS: 0,
+    EGP: 0,
+    XOF: 0,
+    WAT: 0,
   };
 
   const [walletBalances, setWalletBalances] = useState<Record<string, number>>(() => {
@@ -547,7 +547,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [walletBalance, setWalletBalance] = useState<number>(() => {
     const savedBalances = storage.get('wallet_balances', INITIAL_WALLET_BALANCES);
     const curr = storage.get('wallet_currency', 'ZAR');
-    return savedBalances[curr] ?? 24850.0;
+    return savedBalances[curr] ?? 0;
   });
 
   const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>(() =>
@@ -767,17 +767,17 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Authentication, MFA & Onboarding Lifecycle State
   const [authStatus, setAuthStatus] = useState<AuthStatus>(() => {
     const saved = localStorage.getItem('wat_auth_status');
-    return (saved as AuthStatus) || 'AUTHENTICATED';
+    return (saved as AuthStatus) || 'UNAUTHENTICATED';
   });
 
   const [mfaStatus, setMfaStatus] = useState<MfaStatus>(() => {
     const saved = localStorage.getItem('wat_mfa_status');
-    return (saved as MfaStatus) || 'MFA_ACTIVE';
+    return (saved as MfaStatus) || 'MFA_NOT_CONFIGURED';
   });
 
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>(() => {
     const saved = localStorage.getItem('wat_onboarding_status');
-    return (saved as OnboardingStatus) || 'ONBOARDING_COMPLETED';
+    return (saved as OnboardingStatus) || 'ONBOARDING_NOT_STARTED';
   });
 
   const [onboardingStep, setOnboardingStep] = useState<number>(() => {
@@ -819,16 +819,16 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: newUserId,
       name: formData.name,
       handle: cleanHandle,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-      statusMessage: 'Available ✦ Building on WAT',
+      avatar: '/wat-logo.png',
+      statusMessage: '',
       isOnline: true,
       phone: formData.phone,
       dob: formData.dob,
       country: formData.country,
       location: formData.country,
-      joinedDate: 'Joined recently',
+      joinedDate: new Date().toISOString(),
       deviceId: `WAT_DEVICE_${Math.floor(1000 + Math.random() * 9000)}`,
-      e2eeFingerprint: 'Xk9P/7Qw2+Vz8My4N1nF9Kj5Rt3sD8hL',
+      e2eeFingerprint: '',
       isPhonePublic: false,
       isEmailPublic: false,
       isLocationPublic: true,
@@ -884,8 +884,8 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!pendingLoginUser) {
       return { success: false, error: 'No pending authentication session' };
     }
-    // Accept valid 6 digit code (demo: '123456' or any 6-digit number)
-    if (code.length === 6) {
+    // Verification must be completed by the authentication provider.
+    if (/^\d{6}$/.test(code) && pendingLoginUser.mfaStatus === 'MFA_ACTIVE') {
       setCurrentUserId(pendingLoginUser.id);
       setAuthStatus('AUTHENTICATED');
       setMfaStatus('MFA_ACTIVE');
@@ -961,7 +961,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     logout();
   };
 
-  // Switch demo user
+  // Switch the active account only after an authenticated account is selected.
   const setCurrentUserById = (userId: string) => {
     const found = users.find((u) => u.id === userId);
     if (found) {
@@ -1046,7 +1046,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     enableAuth: true,
     authType: 'jwt',
     jwtAppId: 'wat_matrix_app',
-    jwtAppSecret: 'sovereign_wat_secret_key_8892',
+    jwtAppSecret: '',
     enableGuests: true,
     enableLetsEncrypt: true,
     letsEncryptEmail: 'devops@wat.chat',
@@ -1498,14 +1498,14 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const clearAllAppData = () => {
     storage.clearAllAppData();
     setUsers(INITIAL_USERS);
-    setCurrentUserId('user_lusimadio');
+    setCurrentUserId('');
     setRooms(INITIAL_ROOMS);
     setMessagesByRoom(INITIAL_MESSAGES);
     setStories(INITIAL_STORIES);
     setProducts(INITIAL_PRODUCTS);
-    setWalletBalance(24850.0);
+    setWalletBalance(0);
     setWalletCurrency('ZAR');
-    setWalletTransactions(INITIAL_WALLET_TRANSACTIONS);
+    setWalletTransactions([]);
     setOutboxQueue([]);
     soundEngine.playChime();
   };

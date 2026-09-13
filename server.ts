@@ -108,7 +108,38 @@ async function startServer() {
   const configuredPort = Number.parseInt(process.env.PORT || '3000', 10);
   const PORT = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
 
-  app.use(express.json({ limit: '10mb' }));
+  app.disable('x-powered-by');
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=()');
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    if (process.env.NODE_ENV === 'production') {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+      res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; img-src 'self' data: https:; media-src 'self' blob: https:; connect-src 'self' wss: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'");
+    }
+    next();
+  });
+  app.use(express.json({ limit: '256kb' }));
+
+  const requestWindows = new Map<string, { count: number; resetAt: number }>();
+  app.use('/api', (req, res, next) => {
+    const key = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const record = requestWindows.get(key);
+    const windowRecord = !record || record.resetAt <= now
+      ? { count: 0, resetAt: now + 60_000 }
+      : record;
+    windowRecord.count += 1;
+    requestWindows.set(key, windowRecord);
+    res.setHeader('RateLimit-Limit', '120');
+    res.setHeader('RateLimit-Remaining', String(Math.max(0, 120 - windowRecord.count)));
+    if (windowRecord.count > 120) {
+      return res.status(429).json({ error: 'Too many requests. Please try again shortly.' });
+    }
+    next();
+  });
 
   // WAT Commerce & Payment Infrastructure Router
   app.use('/api', createPaymentRouter());
@@ -117,13 +148,7 @@ async function startServer() {
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({
       status: 'ok',
-      service: 'WAT Messaging API',
-      matrixHomeserver: 'matrix.wat.chat (Synapse 1.98.0)',
-      database: 'PostgreSQL 16',
-      cache: 'Redis 7.2',
-      storage: 'MinIO S3',
-      e2ee: 'Olm/Megolm (Vodozemac 0.6.0)',
-      geminiConfigured: !!process.env.GEMINI_API_KEY,
+      service: 'wat-api',
     });
   });
 
@@ -777,7 +802,9 @@ Keep it concise and crystal clear.`,
       ? new URL(request.url, `http://${request.headers.host}`).pathname
       : '';
 
-    if (pathname === '/live') {
+    const origin = request.headers.origin;
+    const host = request.headers.host;
+    if (pathname === '/live' && (!origin || origin === `http://${host}` || origin === `https://${host}`)) {
       wss.handleUpgrade(request, socket, head, (ws) => {
         wss.emit('connection', ws, request);
       });
