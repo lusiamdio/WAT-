@@ -74,7 +74,7 @@ export interface CheckoutSession {
   createdAt: number;
   lastActivityAt: number;
   userId: string;
-  idempotencyKey?: string;
+
   abandonedEmailSent?: boolean;
   abandonedEmailSentAt?: number;
   recoveryUrl?: string;
@@ -1082,7 +1082,7 @@ export function createPaymentRouter(): Router {
         sessionId,
         userId: req.auth!.userId,
         orderId: `WAT-ORD-${Math.floor(100000 + Math.random() * 900000)}`,
-        idempotencyKey,
+
         customer: session.customer,
         items, subtotal, discount, tax, shipping, total, currency,
         status: 'pending',
@@ -1126,16 +1126,7 @@ export function createPaymentRouter(): Router {
       if (!checkoutSession || checkoutSession.status !== 'pending') {
         return res.status(400).json({ error: 'A pending checkout session owned by the current user is required' });
       }
-      const supportedPaymentMethods = new Set(['card', 'google_pay', 'apple_pay', 'eft', 'stripe', 'momo', 'mpesa']);
-      if (!supportedPaymentMethods.has(paymentMethod)) {
-        return res.status(400).json({ error: 'Unsupported payment method' });
-      }
-      if (!idempotencyKey || idempotencyKey !== checkoutSession.idempotencyKey) {
-        return res.status(400).json({ error: 'The checkout session idempotency key is required' });
-      }
-      if (currency !== checkoutSession.currency) {
-        return res.status(400).json({ error: 'Payment currency does not match the checkout session' });
-      }
+
 
       const paymentTotal = toFiniteNonNegativeNumber(total);
       if (paymentTotal === null || paymentTotal <= 0) {
