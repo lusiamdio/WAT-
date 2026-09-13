@@ -106,8 +106,7 @@ ${messageSnippets.length > 0 ? messageSnippets.join('\n') : '• Regular sync an
 
 async function startServer() {
   const app = express();
-  if (process.env.NODE_ENV === 'production' && (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY)) {
-    throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY must be configured in production');
+
   }
   const configuredPort = Number.parseInt(process.env.PORT || '3000', 10);
   const PORT = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -748,7 +747,7 @@ Keep it concise and crystal clear.`,
           contents: {
             parts: [
               audioPart,
-              {
+              {47
                 text:
                   prompt ||
                   'Transcribe this spoken audio accurately. Output only the verbatim spoken transcription, without any commentary or quotation marks.',
@@ -817,7 +816,7 @@ Keep it concise and crystal clear.`,
     const origin = request.headers.origin;
     const host = request.headers.host;
     const accessToken = new URL(request.url || '', `http://${host}`).searchParams.get('access_token') || undefined;
-    const auth = await authenticateAccessToken(accessToken);
+
     if (pathname === '/live' && auth && (!origin || origin === `http://${host}` || origin === `https://${host}`)) {
       wss.handleUpgrade(request, socket, head, (ws) => {
         (request as any).auth = auth;
