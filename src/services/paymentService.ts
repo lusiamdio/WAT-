@@ -9,6 +9,7 @@ import {
   EmailNotification,
   PaymentMethodType,
 } from '../types/payment';
+import { authenticatedHeaders } from './supabaseAuth';
 
 export interface ProcessPaymentPayload {
   sessionId?: string;
@@ -40,7 +41,7 @@ export const paymentService = {
   // 1. Fetch saved payment methods
   async getPaymentMethods(userId = 'user_lusimadio'): Promise<SavedPaymentMethod[]> {
     try {
-      const res = await fetch(`/api/payment-methods?userId=${encodeURIComponent(userId)}`);
+      const res = await fetch('/api/payment-methods', { headers: authenticatedHeaders() });
       if (res.ok) {
         const data = await res.json();
         return data.paymentMethods || [];
@@ -64,7 +65,7 @@ export const paymentService = {
     try {
       const res = await fetch('/api/payment-methods', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -80,7 +81,7 @@ export const paymentService = {
   // 3. Remove payment method
   async deletePaymentMethod(id: string): Promise<boolean> {
     try {
-      const res = await fetch(`/api/payment-methods/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/payment-methods/${id}`, { method: 'DELETE', headers: authenticatedHeaders() });
       return res.ok;
     } catch {
       return false;
@@ -90,7 +91,7 @@ export const paymentService = {
   // 4. Set as default card
   async setDefaultMethod(id: string): Promise<boolean> {
     try {
-      const res = await fetch(`/api/payment-methods/${id}/default`, { method: 'POST' });
+      const res = await fetch(`/api/payment-methods/${id}/default`, { method: 'POST', headers: authenticatedHeaders() });
       return res.ok;
     } catch {
       return false;
@@ -105,7 +106,7 @@ export const paymentService = {
     try {
       const res = await fetch('/api/checkout/validate-voucher', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ code, subtotal }),
       });
       const data = await res.json();
@@ -134,7 +135,7 @@ export const paymentService = {
     try {
       const res = await fetch('/api/checkout/create-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(params),
       });
       if (res.ok) {
@@ -161,7 +162,7 @@ export const paymentService = {
     try {
       const res = await fetch('/api/checkout/process-payment', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -245,7 +246,7 @@ export const paymentService = {
     try {
       const res = await fetch('/api/checkout/sessions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(sessionData),
       });
       const data = await res.json();
@@ -278,7 +279,7 @@ export const paymentService = {
   // 12. Run Abandoned Checkout Job
   async runAbandonedCheckoutJob(): Promise<{ success: boolean; result?: any; message?: string }> {
     try {
-      const res = await fetch('/api/checkout/abandoned/run-job', { method: 'POST' });
+      const res = await fetch('/api/checkout/abandoned/run-job', { method: 'POST', headers: authenticatedHeaders() });
       return await res.json();
     } catch (e: any) {
       return { success: false, message: e?.message };
@@ -293,7 +294,7 @@ export const paymentService = {
     try {
       const res = await fetch('/api/checkout/abandoned/simulate-test', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload || {}),
       });
       return await res.json();
@@ -330,7 +331,7 @@ export const paymentService = {
     try {
       const res = await fetch('/api/wallet/transfer-handle', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authenticatedHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(payload),
       });
       const data = await res.json();

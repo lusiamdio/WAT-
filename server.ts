@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createPaymentRouter } from './server/payments';
+import { authenticateAccessToken, requireAuthenticatedUser } from './server/auth';
 
 dotenv.config();
 
@@ -105,6 +106,9 @@ ${messageSnippets.length > 0 ? messageSnippets.join('\n') : '• Regular sync an
 
 async function startServer() {
   const app = express();
+  if (process.env.NODE_ENV === 'production' && (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY)) {
+    throw new Error('SUPABASE_URL and SUPABASE_ANON_KEY must be configured in production');
+  }
   const configuredPort = Number.parseInt(process.env.PORT || '3000', 10);
   const PORT = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
 
@@ -133,6 +137,11 @@ async function startServer() {
       : record;
     windowRecord.count += 1;
     requestWindows.set(key, windowRecord);
+    if (requestWindows.size > 10_000) {
+      for (const [ip, entry] of requestWindows) {
+        if (entry.resetAt <= now) requestWindows.delete(ip);
+      }
+    }
     res.setHeader('RateLimit-Limit', '120');
     res.setHeader('RateLimit-Remaining', String(Math.max(0, 120 - windowRecord.count)));
     if (windowRecord.count > 120) {
@@ -219,6 +228,9 @@ async function startServer() {
       settlementRail: 'Matrix Decentralized Settlement',
     });
   });
+
+  // AI features spend provider quota and may contain private conversation data.
+  app.use('/api/ai', requireAuthenticatedUser);
 
   // AI Chat / Copilot Assistant
   app.post('/api/ai/chat', async (req: Request, res: Response) => {
@@ -795,17 +807,20 @@ Keep it concise and crystal clear.`,
 
   // HTTP Server & WebSocket Server for Gemini Live API (gemini-3.1-flash-live-preview)
   const server = http.createServer(app);
-  const wss = new WebSocketServer({ noServer: true });
+  const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
 
-  server.on('upgrade', (request, socket, head) => {
+  server.on('upgrade', async (request, socket, head) => {
     const pathname = request.url
       ? new URL(request.url, `http://${request.headers.host}`).pathname
       : '';
 
     const origin = request.headers.origin;
     const host = request.headers.host;
-    if (pathname === '/live' && (!origin || origin === `http://${host}` || origin === `https://${host}`)) {
+    const accessToken = new URL(request.url || '', `http://${host}`).searchParams.get('access_token') || undefined;
+    const auth = await authenticateAccessToken(accessToken);
+    if (pathname === '/live' && auth && (!origin || origin === `http://${host}` || origin === `https://${host}`)) {
       wss.handleUpgrade(request, socket, head, (ws) => {
+        (request as any).auth = auth;
         wss.emit('connection', ws, request);
       });
       return;
@@ -927,7 +942,18 @@ Keep it concise and crystal clear.`,
         );
       }
 
+      let messageWindowStartedAt = Date.now();
+      let messageCount = 0;
       clientWs.on('message', (data) => {
+        const now = Date.now();
+        if (now - messageWindowStartedAt >= 60_000) {
+          messageWindowStartedAt = now;
+          messageCount = 0;
+        }
+        if (++messageCount > 120) {
+          clientWs.close(1008, 'Message rate limit exceeded');
+          return;
+        }
         try {
           const payload = JSON.parse(data.toString());
           if (payload.audio && session) {
