@@ -797,6 +797,17 @@ export function resolveMatrixUser(handleOrLink: string) {
 export function createPaymentRouter(): Router {
   const router = Router();
 
+  // This repository does not include a PCI-compliant payment provider. Never
+  // expose its in-memory development implementation in a production deployment.
+  router.use(['/payment-methods', '/checkout', '/notifications/emails', '/orders', '/wallet'], (req: Request, res: Response, next) => {
+    if (process.env.NODE_ENV === 'production' && process.env.WAT_PAYMENT_PROVIDER_ENABLED !== 'true') {
+      return res.status(503).json({
+        error: 'Payments are not configured. Connect a PCI-compliant provider before enabling commerce.',
+      });
+    }
+    next();
+  });
+
   // Initialize and run the 2-hour abandoned checkout background worker
   startAbandonedCheckoutWorker();
 

@@ -34,12 +34,12 @@ export const PersonalSignUpFlow: React.FC<PersonalSignUpFlowProps> = ({
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
   // Step 1: Your Details
-  const [firstName, setFirstName] = useState('Kwame');
-  const [lastName, setLastName] = useState('Mensah');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES[0]);
-  const [phoneNumber, setPhoneNumber] = useState('802 456 7890');
-  const [emailAddress, setEmailAddress] = useState('kwame.mensah@wat.chat');
-  const [password, setPassword] = useState('watSecure2026!');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [emailAddress, setEmailAddress] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [step1Error, setStep1Error] = useState('');
 
@@ -52,9 +52,9 @@ export const PersonalSignUpFlow: React.FC<PersonalSignUpFlowProps> = ({
 
   // Step 3: Build Profile
   const [avatar, setAvatar] = useState(PRESET_AVATARS[0]);
-  const [displayName, setDisplayName] = useState('Kwame Mensah');
-  const [username, setUsername] = useState('kwamemensah');
-  const [shortBio, setShortBio] = useState('Product Architect & Explorer');
+  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
+  const [shortBio, setShortBio] = useState('');
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -376,19 +376,8 @@ export const PersonalSignUpFlow: React.FC<PersonalSignUpFlowProps> = ({
                 ))}
               </div>
 
-              {/* Demo Fill & Resend Controls */}
+              {/* Resend verification code */}
               <div className="flex items-center justify-between text-xs text-neutral-500">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOtpDigits(['7', '4', '2', '9', '1', '8']);
-                    soundEngine.playChime();
-                  }}
-                  className="text-[10px] text-neutral-600 hover:text-black font-medium hover:underline"
-                >
-                  Auto-fill code (742918)
-                </button>
-
                 <button
                   type="button"
                   onClick={() => {
