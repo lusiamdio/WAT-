@@ -106,8 +106,7 @@ ${messageSnippets.length > 0 ? messageSnippets.join('\n') : '• Regular sync an
 
 async function startServer() {
   const app = express();
-  if (process.env.NODE_ENV === 'production' && !process.env.AUTH_TOKEN_SECRET) {
-    throw new Error('AUTH_TOKEN_SECRET must be configured in production');
+
   }
   const configuredPort = Number.parseInt(process.env.PORT || '3000', 10);
   const PORT = Number.isInteger(configuredPort) && configuredPort > 0 ? configuredPort : 3000;
@@ -748,7 +747,7 @@ Keep it concise and crystal clear.`,
           contents: {
             parts: [
               audioPart,
-              {
+              {47
                 text:
                   prompt ||
                   'Transcribe this spoken audio accurately. Output only the verbatim spoken transcription, without any commentary or quotation marks.',
@@ -809,7 +808,7 @@ Keep it concise and crystal clear.`,
   const server = http.createServer(app);
   const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
 
-  server.on('upgrade', (request, socket, head) => {
+  server.on('upgrade', async (request, socket, head) => {
     const pathname = request.url
       ? new URL(request.url, `http://${request.headers.host}`).pathname
       : '';
@@ -817,7 +816,7 @@ Keep it concise and crystal clear.`,
     const origin = request.headers.origin;
     const host = request.headers.host;
     const accessToken = new URL(request.url || '', `http://${host}`).searchParams.get('access_token') || undefined;
-    const auth = authenticateAccessToken(accessToken);
+
     if (pathname === '/live' && auth && (!origin || origin === `http://${host}` || origin === `https://${host}`)) {
       wss.handleUpgrade(request, socket, head, (ws) => {
         (request as any).auth = auth;
