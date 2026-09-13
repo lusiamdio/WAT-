@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { AuthenticatedRequest, requireAuthenticatedUser } from './auth';
 
 export interface SavedPaymentMethod {
   id: string;
@@ -72,6 +73,7 @@ export interface CheckoutSession {
   status: 'pending' | 'completed' | 'abandoned';
   createdAt: number;
   lastActivityAt: number;
+  userId: string;
   abandonedEmailSent?: boolean;
   abandonedEmailSentAt?: number;
   recoveryUrl?: string;
@@ -198,6 +200,7 @@ function isValidCheckoutItem(item: any): boolean {
 const checkoutSessionsStore: CheckoutSession[] = [
   {
     sessionId: 'cs_seed_abandoned_01',
+    userId: 'user_lusimadio',
     orderId: 'WAT-ORD-882190',
     customer: {
       name: 'Lusimadio Nkem',
@@ -790,7 +793,7 @@ export function resolveMatrixUser(handleOrLink: string) {
     handle: `@${clean}:wat.chat`,
     link: `https://wat.chat/@${clean}:wat.chat`,
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-    verified: true,
+    verified: false,
   };
 }
 
@@ -808,13 +811,18 @@ export function createPaymentRouter(): Router {
     next();
   });
 
+  // All commerce data is scoped to the authenticated user; never accept a caller-supplied user id.
+  router.use(requireAuthenticatedUser);
+
   // Initialize and run the 2-hour abandoned checkout background worker
   startAbandonedCheckoutWorker();
 
   // 1. GET /api/payment-methods - Retrieve saved cards for current user
-  router.get('/payment-methods', (req: Request, res: Response) => {
-    const userId = (req.query.userId as string) || 'user_lusimadio';
-    const methods = savedPaymentMethods.filter((m) => m.userId === userId);
+  router.get('/payment-methods', (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.auth!.userId;
+    const methods = savedPaymentMethods
+      .filter((m) => m.userId === userId)
+      .map(({ token: _token, ...method }) => method);
     res.json({
       success: true,
       paymentMethods: methods,
@@ -823,7 +831,7 @@ export function createPaymentRouter(): Router {
   });
 
   // 2. POST /api/payment-methods - Add new tokenized card
-  router.post('/payment-methods', (req: Request, res: Response) => {
+  router.post('/payment-methods', (req: AuthenticatedRequest, res: Response) => {
     try {
       const {
         cardNumber,
@@ -832,8 +840,12 @@ export function createPaymentRouter(): Router {
         cvv,
         cardholderName,
         isDefault = false,
-        userId = 'user_lusimadio',
       } = req.body;
+
+      const userId = req.auth!.userId;
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(501).json({ error: 'Direct card collection is disabled. Use a PCI-compliant provider token.' });
+      }
 
       if (!cardNumber || !expMonth || !expYear || !cardholderName) {
         return res.status(400).json({
@@ -900,7 +912,7 @@ export function createPaymentRouter(): Router {
       res.status(201).json({
         success: true,
         message: 'Bank card successfully saved and tokenized with PCI-DSS compliance.',
-        paymentMethod: newMethod,
+        paymentMethod: (({ token: _token, ...method }) => method)(newMethod),
       });
     } catch (err: any) {
       res.status(500).json({ error: err?.message || 'Failed to save payment method' });
@@ -908,9 +920,9 @@ export function createPaymentRouter(): Router {
   });
 
   // 3. DELETE /api/payment-methods/:id - Delete card
-  router.delete('/payment-methods/:id', (req: Request, res: Response) => {
+  router.delete('/payment-methods/:id', (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
-    const index = savedPaymentMethods.findIndex((m) => m.id === id);
+    const index = savedPaymentMethods.findIndex((m) => m.id === id && m.userId === req.auth!.userId);
     if (index === -1) {
       return res.status(404).json({ error: 'Payment method not found' });
     }
@@ -928,9 +940,9 @@ export function createPaymentRouter(): Router {
   });
 
   // 4. POST /api/payment-methods/:id/default - Set default
-  router.post('/payment-methods/:id/default', (req: Request, res: Response) => {
+  router.post('/payment-methods/:id/default', (req: AuthenticatedRequest, res: Response) => {
     const { id } = req.params;
-    const target = savedPaymentMethods.find((m) => m.id === id);
+    const target = savedPaymentMethods.find((m) => m.id === id && m.userId === req.auth!.userId);
     if (!target) {
       return res.status(404).json({ error: 'Payment method not found' });
     }
@@ -993,7 +1005,7 @@ export function createPaymentRouter(): Router {
   });
 
   // 6. POST /api/checkout/create-session - Server-side checkout session creation
-  router.post('/checkout/create-session', (req: Request, res: Response) => {
+  router.post('/checkout/create-session', (req: AuthenticatedRequest, res: Response) => {
     try {
       const {
         items = [],
@@ -1042,6 +1054,7 @@ export function createPaymentRouter(): Router {
 
       const session = {
         sessionId,
+        userId: req.auth!.userId,
         items,
         subtotal,
         discount,
@@ -1064,6 +1077,16 @@ export function createPaymentRouter(): Router {
         createdAt: Date.now(),
       };
 
+      checkoutSessionsStore.unshift({
+        sessionId,
+        userId: req.auth!.userId,
+        orderId: `WAT-ORD-${Math.floor(100000 + Math.random() * 900000)}`,
+        customer: session.customer,
+        items, subtotal, discount, tax, shipping, total, currency,
+        status: 'pending',
+        createdAt: Date.now(),
+        lastActivityAt: Date.now(),
+      });
       res.json({
         success: true,
         session,
@@ -1074,7 +1097,7 @@ export function createPaymentRouter(): Router {
   });
 
   // 7. POST /api/checkout/process-payment - Authorize & Settle payment
-  router.post('/checkout/process-payment', (req: Request, res: Response) => {
+  router.post('/checkout/process-payment', (req: AuthenticatedRequest, res: Response) => {
     try {
       const {
         sessionId,
@@ -1097,6 +1120,10 @@ export function createPaymentRouter(): Router {
       if (!paymentMethod) {
         return res.status(400).json({ error: 'Payment method is required' });
       }
+      const checkoutSession = checkoutSessionsStore.find((session) => session.sessionId === sessionId && session.userId === req.auth!.userId);
+      if (!checkoutSession || checkoutSession.status !== 'pending') {
+        return res.status(400).json({ error: 'A pending checkout session owned by the current user is required' });
+      }
 
       const paymentTotal = toFiniteNonNegativeNumber(total);
       if (paymentTotal === null || paymentTotal <= 0) {
@@ -1111,6 +1138,11 @@ export function createPaymentRouter(): Router {
       }
       if (!Array.isArray(items) || items.length === 0 || !items.every(isValidCheckoutItem)) {
         return res.status(400).json({ error: 'At least one valid checkout item is required' });
+      }
+      const suppliedAmounts = [paymentSubtotal, paymentDiscount, paymentTax, paymentShipping, paymentTotal];
+      const sessionAmounts = [checkoutSession.subtotal, checkoutSession.discount, checkoutSession.tax, checkoutSession.shipping, checkoutSession.total];
+      if (suppliedAmounts.some((amount, index) => amount !== sessionAmounts[index]) || JSON.stringify(items) !== JSON.stringify(checkoutSession.items)) {
+        return res.status(400).json({ error: 'Payment details do not match the server-created checkout session' });
       }
 
       // Idempotency check
@@ -1227,6 +1259,8 @@ export function createPaymentRouter(): Router {
         estimatedDelivery: '2-4 Business Days via WAT Express Logistics',
       };
 
+      checkoutSession.status = 'completed';
+      checkoutSession.lastActivityAt = now;
       ordersStore.unshift(confirmedOrder);
 
       const successTxn = {
@@ -1296,8 +1330,9 @@ export function createPaymentRouter(): Router {
   });
 
   // 8. GET /api/notifications/emails - Retrieve all transactional emails sent to buyer
-  router.get('/notifications/emails', (req: Request, res: Response) => {
-    const email = (req.query.email as string) || 'lusimadio12@gmail.com';
+  router.get('/notifications/emails', (req: AuthenticatedRequest, res: Response) => {
+    const email = req.auth!.email;
+    if (!email) return res.status(400).json({ error: 'Authenticated user has no email address' });
     const filtered = emailNotificationsStore.filter(
       (e) => !email || e.to.toLowerCase() === email.toLowerCase()
     );
@@ -1309,16 +1344,16 @@ export function createPaymentRouter(): Router {
   });
 
   // 9. GET /api/orders - Retrieve confirmed orders
-  router.get('/orders', (req: Request, res: Response) => {
+  router.get('/orders', (req: AuthenticatedRequest, res: Response) => {
     res.json({
       success: true,
-      orders: ordersStore,
+      orders: ordersStore.filter((order) => order.customer?.email === req.auth!.email),
     });
   });
 
   // 10. GET /api/orders/:id - Get specific order
-  router.get('/orders/:id', (req: Request, res: Response) => {
-    const order = ordersStore.find((o) => o.orderId === req.params.id);
+  router.get('/orders/:id', (req: AuthenticatedRequest, res: Response) => {
+    const order = ordersStore.find((o) => o.orderId === req.params.id && o.customer?.email === req.auth!.email);
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -1326,7 +1361,7 @@ export function createPaymentRouter(): Router {
   });
 
   // 11. POST /api/checkout/sessions - Save or update checkout session (tracks progress for abandoned recovery)
-  router.post('/checkout/sessions', (req: Request, res: Response) => {
+  router.post('/checkout/sessions', (req: AuthenticatedRequest, res: Response) => {
     try {
       const {
         sessionId = `cs_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
@@ -1351,9 +1386,10 @@ export function createPaymentRouter(): Router {
         return res.status(400).json({ error: 'Checkout amounts must be non-negative numbers' });
       }
 
-      const existingIndex = checkoutSessionsStore.findIndex((s) => s.sessionId === sessionId);
+      const existingIndex = checkoutSessionsStore.findIndex((s) => s.sessionId === sessionId && s.userId === req.auth!.userId);
       const sessionData: CheckoutSession = {
         sessionId,
+        userId: req.auth!.userId,
         orderId: existingIndex >= 0 ? checkoutSessionsStore[existingIndex].orderId : orderId,
         customer: customer || {
           name: 'Lusimadio Nkem',
@@ -1397,14 +1433,15 @@ export function createPaymentRouter(): Router {
   });
 
   // 12. GET /api/checkout/sessions - Retrieve checkout sessions & status
-  router.get('/checkout/sessions', (req: Request, res: Response) => {
+  router.get('/checkout/sessions', (req: AuthenticatedRequest, res: Response) => {
+    const sessions = checkoutSessionsStore.filter((session) => session.userId === req.auth!.userId);
     res.json({
       success: true,
-      sessions: checkoutSessionsStore,
-      total: checkoutSessionsStore.length,
-      pending: checkoutSessionsStore.filter((s) => s.status === 'pending').length,
-      abandoned: checkoutSessionsStore.filter((s) => s.status === 'abandoned').length,
-      completed: checkoutSessionsStore.filter((s) => s.status === 'completed').length,
+      sessions,
+      total: sessions.length,
+      pending: sessions.filter((s) => s.status === 'pending').length,
+      abandoned: sessions.filter((s) => s.status === 'abandoned').length,
+      completed: sessions.filter((s) => s.status === 'completed').length,
     });
   });
 
@@ -1420,11 +1457,12 @@ export function createPaymentRouter(): Router {
   });
 
   // 14. POST /api/checkout/abandoned/simulate-test - Create a simulated 2.5-hour abandoned session and run job
-  router.post('/checkout/abandoned/simulate-test', (req: Request, res: Response) => {
+  router.post('/checkout/abandoned/simulate-test', (req: AuthenticatedRequest, res: Response) => {
     const testSessionId = `cs_sim_${Date.now()}`;
     const testOrderId = `WAT-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
     const session: CheckoutSession = {
       sessionId: testSessionId,
+      userId: req.auth!.userId,
       orderId: testOrderId,
       customer: {
         name: req.body.customerName || 'Lusimadio Nkem',
@@ -1471,12 +1509,13 @@ export function createPaymentRouter(): Router {
   });
 
   // 15. GET /api/checkout/abandoned/stats - Get abandoned checkout metrics
-  router.get('/checkout/abandoned/stats', (req: Request, res: Response) => {
-    const pendingSessions = checkoutSessionsStore.filter((s) => s.status === 'pending');
-    const abandonedEmails = emailNotificationsStore.filter((e) => e.type === 'abandoned_checkout');
+  router.get('/checkout/abandoned/stats', (req: AuthenticatedRequest, res: Response) => {
+    const userSessions = checkoutSessionsStore.filter((session) => session.userId === req.auth!.userId);
+    const pendingSessions = userSessions.filter((s) => s.status === 'pending');
+    const abandonedEmails = emailNotificationsStore.filter((e) => e.type === 'abandoned_checkout' && e.to === req.auth!.email);
     res.json({
       success: true,
-      totalSessions: checkoutSessionsStore.length,
+      totalSessions: userSessions.length,
       pendingSessionsCount: pendingSessions.length,
       abandonedEmailsSentCount: abandonedEmails.length,
       lastJobRunTime: lastAbandonedJobRunTime,
